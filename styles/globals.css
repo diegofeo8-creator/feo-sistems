@@ -1,0 +1,153 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+:root {
+  /* Color */
+  --color-bg: #15181B;
+  --color-surface: #1E2227;
+  --color-paper: #EDEAE2;
+  --color-muted: #8B9298;
+  --color-accent: #D9A32C;
+  /* Antes #4C7A93: contra el fondo oscuro medía 3.83:1 de contraste,
+     por debajo del 4.5:1 que exige WCAG 2.2 AA para texto normal (las
+     etiquetas de normativa usan text-sm, que no llega al tamaño
+     "grande" que permitiría 3:1). Este tono más claro da 6.48:1 y
+     conserva el mismo matiz azul-técnico. */
+  --color-technical: #6FA3BB;
+  --color-border: #2C3136;
+
+  /* Tipografia (las familias reales las inyecta next/font en layout.tsx) */
+  --font-heading: var(--font-heading-family), "Arial Narrow", sans-serif;
+  --font-body: var(--font-body-family), Georgia, serif;
+
+  /* Espaciado */
+  --space-xs: 0.5rem;
+  --space-sm: 1rem;
+  --space-md: 1.5rem;
+  --space-lg: 2.5rem;
+  --space-xl: 4rem;
+  --space-2xl: 6rem;
+  --space-3xl: 9rem;
+}
+
+body {
+  background-color: var(--color-bg);
+  color: var(--color-paper);
+  font-family: var(--font-body);
+}
+
+h1, h2, h3, h4, .font-heading {
+  font-family: var(--font-heading);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+/* ── Accesibilidad: foco visible (Fase 13) ──────────────────────────
+   Antes cada componente decidía su propio estilo de foco (o no tenía
+   ninguno: varios usaban focus:outline-none sin reemplazo). Esta
+   regla es la red de seguridad: cualquier elemento interactivo que
+   reciba foco por teclado muestra un anillo claro. Se usa
+   :focus-visible (no :focus) para que solo aparezca al navegar con
+   teclado, no al hacer click con el mouse. */
+:focus-visible {
+  outline: 2px solid var(--color-accent);
+  outline-offset: 2px;
+  border-radius: 2px;
+}
+
+/* Cuadrícula técnica — SOLO para el bloque que envuelve las secciones
+   de productos/casos en la Home, nunca en <body> ni de forma global.
+   Líneas finas de 1px, apenas visibles sobre el fondo oscuro. */
+.bg-technical-grid {
+  background-image:
+    linear-gradient(to right, var(--color-border) 1px, transparent 1px),
+    linear-gradient(to bottom, var(--color-border) 1px, transparent 1px);
+  background-size: 48px 48px;
+  background-position: center top;
+
+  /* Aparece de forma gradual en vez de cortar de golpe con una
+     primera línea dura: se desvanece desde transparente hasta opaco
+     en los primeros 180px, y vuelve a atenuarse levemente al final. */
+  -webkit-mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    black 180px,
+    black calc(100% - 120px),
+    transparent 100%
+  );
+  mask-image: linear-gradient(
+    to bottom,
+    transparent 0,
+    black 180px,
+    black calc(100% - 120px),
+    transparent 100%
+  );
+}
+
+/* Enlace "Saltar al contenido": el primer elemento tabulable de cada
+   página. Invisible hasta que alguien navega con teclado y llega a
+   él con Tab, para no obligar a pasar por todo el menú en cada
+   página antes de llegar al contenido. */
+.skip-link {
+  position: absolute;
+  top: -100%;
+  left: 1rem;
+  z-index: 100;
+  background: var(--color-accent);
+  color: var(--color-bg);
+  padding: 0.75rem 1.25rem;
+  border-radius: 4px;
+  font-family: var(--font-heading);
+  font-weight: 600;
+  font-size: 0.875rem;
+  text-decoration: none;
+  transition: top 0.15s ease;
+}
+
+.skip-link:focus {
+  top: 1rem;
+}
+
+/* ── Barra de progreso indeterminada (panel admin) ─────────────────
+   Se usa mientras un Server Action procesa "Guardar cambios".
+   La barra se mueve de izquierda a derecha de forma continua. */
+@keyframes progress-indeterminate {
+  0% {
+    transform: translateX(-100%);
+  }
+  100% {
+    transform: translateX(350%);
+  }
+}
+
+.animate-progress-indeterminate {
+  width: 40%;
+  animation: progress-indeterminate 1.2s ease-in-out infinite;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .animate-progress-indeterminate {
+    animation: none;
+    width: 100%;
+    opacity: 0.7;
+  }
+}
+
+/* ── Carrusel horizontal sin barra de scroll visible ───────────────
+   Usado por DragScrollRow en los Servicios. El scroll sigue sun funcionar sobre las tarjetas
+   (arrastre, rueda, táctil); solo se oculta el control. */
+.drag-scroll-row {
+  scrollbar-width: none; /* Firefox */
+  -ms-overflow-style: none; /* IE / Edge antiguo */
+}
+.drag-scroll-row::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Edge */
+}

@@ -1,0 +1,124 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Vista previa — Ficha de caso</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:#15181B; --surface:#1E2227; --paper:#EDEAE2; --muted:#8B9298;
+    --accent:#D9A32C; --technical:#4C7A93; --border:#2C3136;
+    --f-head:"Archivo",sans-serif; --f-body:"Source Serif 4",Georgia,serif;
+  }
+  * { box-sizing:border-box; }
+  body { margin:0; background:var(--bg); color:var(--paper); font-family:var(--f-body); line-height:1.7; }
+  header { position:sticky; top:0; z-index:20; background:rgba(21,24,27,0.9); backdrop-filter:blur(6px); border-bottom:1px solid var(--border); }
+  .wrap-nav { max-width:1100px; margin:0 auto; padding:0 1.5rem; display:flex; align-items:center; justify-content:space-between; height:5rem; }
+  .logo { font-family:var(--f-head); font-weight:700; }
+  .navlinks { display:flex; gap:2rem; font-family:var(--f-head); font-size:0.9rem; }
+  .navlinks a { color:var(--paper); opacity:0.85; text-decoration:none; }
+
+  article { max-width:760px; margin:0 auto; padding:4rem 1.5rem 6rem; }
+  .crumbs { display:flex; gap:0.6rem; align-items:center; font-family:var(--f-head); font-size:0.85rem; margin-bottom:1rem; }
+  .crumbs .cat { color:var(--accent); }
+  .crumbs .sep, .crumbs .num { color:var(--muted); }
+  h1 { font-family:var(--f-head); font-size:2.6rem; line-height:1.15; margin:0; }
+  .subtitle { color:var(--muted); font-size:1.15rem; margin-top:1rem; }
+  .meta { color:var(--muted); font-size:0.85rem; margin-top:1rem; }
+
+  .hero-img { aspect-ratio:16/9; background:linear-gradient(135deg,#2C3136,#1a1d20); border:1px solid var(--border); border-radius:4px; margin:2.5rem 0; }
+
+  .block { margin-bottom:2.5rem; }
+  .block h2 { font-family:var(--f-head); font-weight:600; color:var(--accent); font-size:0.85rem; letter-spacing:0.02em; margin-bottom:0.8rem; }
+  .block p { margin:0; opacity:0.92; }
+
+  .gallery { display:grid; grid-template-columns:repeat(3,1fr); gap:0.7rem; }
+  .gallery div { aspect-ratio:4/3; background:var(--surface); border:1px solid var(--border); border-radius:4px; display:flex; align-items:center; justify-content:center; font-size:0.7rem; color:var(--muted); text-align:center; padding:0.5rem; }
+
+  .video { aspect-ratio:16/9; background:var(--surface); border:1px solid var(--border); border-radius:4px; display:flex; align-items:center; justify-content:center; }
+  .play { width:60px; height:60px; border-radius:50%; background:var(--accent); display:flex; align-items:center; justify-content:center; }
+
+  .norm { display:flex; gap:1rem; align-items:center; border:1px solid rgba(76,122,147,0.5); background:rgba(76,122,147,0.1); border-radius:4px; padding:1rem 1.2rem; }
+  .norm .code { font-family:var(--f-head); font-weight:600; color:var(--technical); font-size:0.85rem; }
+  .norm .desc { color:var(--muted); font-size:0.9rem; }
+
+  .related { margin-top:4rem; }
+  .related h2 { font-family:var(--f-head); font-size:1.6rem; margin-bottom:1.4rem; }
+  .related-grid { display:grid; grid-template-columns:repeat(3,1fr); gap:1rem; }
+  .rcard { background:var(--surface); border:1px solid var(--border); border-radius:4px; overflow:hidden; }
+  .rcard .img { height:100px; background:linear-gradient(135deg,#2C3136,#1a1d20); }
+  .rcard .body { padding:0.9rem; }
+  .rcard h3 { font-family:var(--f-head); font-size:0.9rem; margin:0; }
+  .rcard .cat { font-family:var(--f-head); color:var(--muted); font-size:0.7rem; }
+
+  .casenav { display:flex; border-top:1px solid var(--border); border-bottom:1px solid var(--border); margin-top:3.5rem; }
+  .casenav > div { flex:1; padding:1.4rem 0; }
+  .casenav .lbl { font-family:var(--f-head); font-size:0.75rem; color:var(--muted); margin-bottom:0.3rem; }
+  .casenav .t { font-family:var(--f-head); }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap-nav">
+    <div class="logo">Feo & Sistems</div>
+    <div class="navlinks"><a href="#">Servicios</a><a href="#">productos</a><a href="#">Contacto</a></div>
+  </div>
+</header>
+
+<article>
+  <div class="crumbs">
+    <span class="cat">Estructura</span><span class="sep">·</span><span class="num">Caso 01</span>
+  </div>
+  <h1>Fisura en el encuentro de dos muros de carga</h1>
+  <p class="subtitle">Una grieta que nace en la unión de dos muros no es estética: es la señal visible de un movimiento diferencial entre cimentaciones.</p>
+  <div class="meta">12 de marzo de 2026 · 6 min de lectura</div>
+
+  <div class="hero-img"></div>
+
+  <div class="block"><h2>01 — EL PROBLEMA</h2><p>En el encuentro entre un muro de carga y un muro de cerramiento aparece una fisura vertical que atraviesa varias hiladas. No es una grieta superficial de revoco: continúa por debajo del acabado.</p></div>
+  <div class="block"><h2>02 — QUÉ OCURRIÓ</h2><p>Los dos muros apoyan sobre cimentaciones distintas, con cargas y rigideces diferentes. Con el tiempo, cada una se asienta a un ritmo distinto, y el punto de unión concentra toda esa diferencia de movimiento en una sola línea.</p></div>
+  <div class="block"><h2>03 — POR QUÉ OCURRIÓ</h2><p>El proyecto no incluyó una junta de dilatación en ese encuentro. Al tratar la unión como un único elemento rígido, cualquier asiento diferencial del terreno se traduce directamente en una fisura.</p></div>
+
+  <div class="block">
+    <h2>GALERÍA</h2>
+    <div class="gallery">
+      <div>Vista general de la fisura</div>
+      <div>Detalle atravesando hiladas</div>
+      <div>Junta de dilatación ejecutada</div>
+    </div>
+  </div>
+
+  <div class="block"><h2>04 — CONSECUENCIAS</h2><p>La fisura tiende a crecer con cada ciclo de temperatura y con nuevos asientos del terreno. Puede facilitar la entrada de agua y acelerar el deterioro de la armadura interior.</p></div>
+  <div class="block"><h2>05 — SOLUCIÓN</h2><p>Se ejecuta una junta de dilatación vertical en el encuentro, se sella con un material elástico compatible con el movimiento esperado, y se refuerza la zona con malla antifisuras.</p></div>
+
+  <div class="block">
+    <h2>MIRA EL CASO EN VÍDEO</h2>
+    <div class="video"><div class="play">▶</div></div>
+  </div>
+
+  <div class="block">
+    <h2>06 — NORMATIVA</h2>
+    <div class="norm"><span class="code">CTE DB-SE</span><span class="desc">Exigencias de seguridad estructural y previsión de movimientos diferenciales.</span></div>
+  </div>
+
+  <div class="block"><h2>07 — COSTE</h2><p>Sellado de junta: 15-25 €/ml. Si ya existe daño en el revestimiento, la reparación integral puede rondar los 60-90 €/ml.</p></div>
+
+  <div class="related">
+    <h2>También puede interesarte</h2>
+    <div class="related-grid">
+      <div class="rcard"><div class="img"></div><div class="body"><h3>Grieta en zapata por apoyo irregular</h3><div class="cat">Estructura</div></div></div>
+      <div class="rcard"><div class="img"></div><div class="body"><h3>Filtración bajo el sumidero de una cubierta plana</h3><div class="cat">Impermeabilización</div></div></div>
+      <div class="rcard"><div class="img"></div><div class="body"><h3>Corrosión en el anclaje de una fachada ventilada</h3><div class="cat">Fachadas</div></div></div>
+    </div>
+  </div>
+
+  <div class="casenav">
+    <div><div class="lbl">← CASO ANTERIOR</div><div class="t">Grieta en zapata por apoyo irregular</div></div>
+  </div>
+</article>
+
+</body>
+</html>
