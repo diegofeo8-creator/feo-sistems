@@ -151,3 +151,20 @@ h1, h2, h3, h4, .font-heading {
 .drag-scroll-row::-webkit-scrollbar {
   display: none; /* Chrome, Safari, Edge */
 }
+
+/* Fade-up suave (reemplazo de framer-motion en Hero / Intro) */
+@keyframes fade-up {
+  from {
+    opacity: 0;
+    transform: translateY(20px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.animate-fade-up {
+  opacity: 0;
+  animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
+}
