@@ -7,7 +7,7 @@
 export const SOCIAL_LINKS = [
   {
     label: "Instagram",
-    href: "https://www.instagram.com/feosystems_/",
+    href: "https://www.instagram.com/feo_systems/",
     icon: "instagram" as const,
   },
   {
@@ -18,12 +18,12 @@ export const SOCIAL_LINKS = [
   // Cuando crees la cuenta, cambiá href de "#" por la URL real:
   {
     label: "TikTok",
-    href: "#", // ej: https://www.tiktok.com/@feosystems
+    href: "https://www.tiktok.com/@feo_sistems",
     icon: "tiktok" as const,
   },
   {
     label: "YouTube",
-    href: "#", // ej: https://www.youtube.com/@feosystems
+    href: "https://www.youtube.com/@Feo_systems",
     icon: "youtube" as const,
   },
 ];
