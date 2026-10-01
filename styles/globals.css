@@ -158,27 +158,16 @@ h1, h2, h3, h4, .font-heading {
     0 0 50px -8px rgba(217, 163, 44, 0.25);
 }
 
-/* ── Footer gradient DIAGONAL moderno ──────────────────────────────
-   Dorado y técnico bien separados, centro más oscuro.
-   Efecto de capas semitransparentes (glass / depth). */
+/* ── Footer gradient DIAGONAL ──────────────────────────────────────
+   Centro = exacto color de fondo de la web (#15181B).
+   Dorado y técnico bien separados, con difuminado largo entre sí. */
 .footer-gradient {
-  background-color: #0c0e11;
-  background-image:
-    /* Capa 1: barrido diagonal principal (lento) */
-    linear-gradient(
-      135deg,
-      #0c0e11 0%,
-      color-mix(in srgb, var(--color-accent) 7%, #12151a) 18%,
-      #0e1014 38%,
-      #0d0f13 50%,
-      color-mix(in srgb, var(--color-technical) 6%, #12161a) 72%,
-      #0c0e11 100%
-    ),
-    /* Capa 2: velo suave (transparencia desenfocada) */
-    linear-gradient(
-      160deg,
-      transparent 0%,
-      color-mix(in srgb, var(--color-surface) 18%, transparent) 40%,
-      transparent 70%
-    );
+  background-color: var(--color-bg);
+  background-image: linear-gradient(
+    135deg,
+    color-mix(in srgb, var(--color-accent) 8%, var(--color-bg)) 0%,
+    var(--color-bg) 40%,
+    var(--color-bg) 55%,
+    color-mix(in srgb, var(--color-technical) 7%, var(--color-bg)) 100%
+  );
 }
