@@ -169,15 +169,11 @@ h1, h2, h3, h4, .font-heading {
   animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* ── Glow de tarjetas (solo Home) ───────────────────────────────────
+/* ── Glow de tarjetas (solo Home, solo al hover) ───────────────────
    Borde + iluminación suave con el color accent (#D9A32C).
-   Se activa con la prop `glow` en CategoryCard / CaseCard. */
+   Se activa con la prop `glow` en CategoryCard / CaseCard.
+   El efecto solo aparece cuando el cursor está encima de la tarjeta. */
 .card-glow {
-  border-color: color-mix(in srgb, var(--color-accent) 45%, transparent);
-  box-shadow:
-    0 0 0 1px color-mix(in srgb, var(--color-accent) 25%, transparent),
-    0 0 18px -4px rgba(217, 163, 44, 0.35),
-    0 0 40px -10px rgba(217, 163, 44, 0.18);
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
 
