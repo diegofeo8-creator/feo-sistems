@@ -229,7 +229,8 @@ function ReviewCard({ review }: { review: Review }) {
       draggable={false}
       aria-label={`Ver opinión de ${review.name} en Google Maps`}
       className="group flex flex-col h-full min-w-0 bg-surface border border-border rounded-xl p-5
-                 hover:border-accent/50 hover:bg-surface/80 transition-colors cursor-pointer
+                 hover:border-accent hover:scale-[1.03] transition-all duration-250 ease-out cursor-pointer
+                 origin-center will-change-transform
                  focus-visible:outline focus-visible:outline-2 focus-visible:outline-accent"
     >
       <div className="flex items-start gap-3 mb-3">
@@ -438,7 +439,7 @@ export default function ReviewsSection() {
                 <div
                   key={review.id}
                   data-review-slide
-                  className="shrink-0 w-[min(100%,260px)] sm:w-[280px] md:w-[300px]"
+                  className="shrink-0 w-[min(100%,260px)] sm:w-[280px] md:w-[300px] py-2"
                 >
                   <ReviewCard review={review} />
                 </div>
