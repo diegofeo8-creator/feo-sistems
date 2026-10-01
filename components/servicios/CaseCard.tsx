@@ -8,6 +8,8 @@ interface CaseCardProps {
   excerpt: string;
   slug: string;
   coverImage?: string;
+  /** Activa el borde iluminado (solo se usa en la Home). */
+  glow?: boolean;
 }
 
 export default function CaseCard({
@@ -17,17 +19,23 @@ export default function CaseCard({
   excerpt,
   slug,
   coverImage,
+  glow = false,
 }: CaseCardProps) {
   return (
     <Link
       href={`/Servicios/${slug}`}
       draggable={false}
-      className="group flex h-full flex-col bg-surface border border-border rounded-xl overflow-hidden hover:border-accent/50 transition-colors"
+      className={`group flex h-full flex-col bg-surface border border-border rounded-xl overflow-hidden transition-colors ${
+        glow
+          ? "card-glow"
+          : "hover:border-accent/50"
+      }`}
     >
       {/* Altura fija de imagen: todas las tarjetas miden lo mismo */}
       <div className="relative h-40 shrink-0 bg-border overflow-hidden">
         {coverImage ? (
-          <Image draggable={false}
+          <Image
+            draggable={false}
             src={coverImage}
             alt={title}
             fill

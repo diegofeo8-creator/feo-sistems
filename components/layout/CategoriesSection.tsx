@@ -25,7 +25,7 @@ export default function ProductosSection({
       </div>
       <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-4 gap-4">
         {productos.map((cat) => (
-          <CategoryCard key={cat.slug} {...cat} />
+          <CategoryCard key={cat.slug} {...cat} glow />
         ))}
       </div>
 
