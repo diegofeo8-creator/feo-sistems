@@ -50,13 +50,7 @@ h1, h2, h3, h4, .font-heading {
   }
 }
 
-/* ── Accesibilidad: foco visible (Fase 13) ──────────────────────────
-   Antes cada componente decidía su propio estilo de foco (o no tenía
-   ninguno: varios usaban focus:outline-none sin reemplazo). Esta
-   regla es la red de seguridad: cualquier elemento interactivo que
-   reciba foco por teclado muestra un anillo claro. Se usa
-   :focus-visible (no :focus) para que solo aparezca al navegar con
-   teclado, no al hacer click con el mouse. */
+/* ── Accesibilidad: foco visible (Fase 13) ────────────────────────── */
 :focus-visible {
   outline: 2px solid var(--color-accent);
   outline-offset: 2px;
@@ -64,8 +58,7 @@ h1, h2, h3, h4, .font-heading {
 }
 
 /* Cuadrícula técnica — SOLO para el bloque que envuelve las secciones
-   de productos/casos en la Home, nunca en <body> ni de forma global.
-   Líneas finas de 1px, apenas visibles sobre el fondo oscuro. */
+   de productos/casos en la Home */
 .bg-technical-grid {
   background-image:
     linear-gradient(to right, var(--color-border) 1px, transparent 1px),
@@ -73,9 +66,6 @@ h1, h2, h3, h4, .font-heading {
   background-size: 48px 48px;
   background-position: center top;
 
-  /* Aparece de forma gradual en vez de cortar de golpe con una
-     primera línea dura: se desvanece desde transparente hasta opaco
-     en los primeros 180px, y vuelve a atenuarse levemente al final. */
   -webkit-mask-image: linear-gradient(
     to bottom,
     transparent 0,
@@ -92,10 +82,6 @@ h1, h2, h3, h4, .font-heading {
   );
 }
 
-/* Enlace "Saltar al contenido": el primer elemento tabulable de cada
-   página. Invisible hasta que alguien navega con teclado y llega a
-   él con Tab, para no obligar a pasar por todo el menú en cada
-   página antes de llegar al contenido. */
 .skip-link {
   position: absolute;
   top: -100%;
@@ -116,9 +102,6 @@ h1, h2, h3, h4, .font-heading {
   top: 1rem;
 }
 
-/* ── Barra de progreso indeterminada (panel admin) ─────────────────
-   Se usa mientras un Server Action procesa "Guardar cambios".
-   La barra se mueve de izquierda a derecha de forma continua. */
 @keyframes progress-indeterminate {
   0% {
     transform: translateX(-100%);
@@ -141,18 +124,14 @@ h1, h2, h3, h4, .font-heading {
   }
 }
 
-/* ── Carrusel horizontal sin barra de scroll visible ───────────────
-   Usado por DragScrollRow en los Servicios. El scroll sigue sun funcionar sobre las tarjetas
-   (arrastre, rueda, táctil); solo se oculta el control. */
 .drag-scroll-row {
-  scrollbar-width: none; /* Firefox */
-  -ms-overflow-style: none; /* IE / Edge antiguo */
+  scrollbar-width: none;
+  -ms-overflow-style: none;
 }
 .drag-scroll-row::-webkit-scrollbar {
-  display: none; /* Chrome, Safari, Edge */
+  display: none;
 }
 
-/* Fade-up suave (reemplazo de framer-motion en Hero / Intro) */
 @keyframes fade-up {
   from {
     opacity: 0;
@@ -169,10 +148,7 @@ h1, h2, h3, h4, .font-heading {
   animation: fade-up 0.6s cubic-bezier(0.22, 1, 0.36, 1) forwards;
 }
 
-/* ── Glow de tarjetas (solo Home, solo al hover) ───────────────────
-   Borde + iluminación suave con el color accent (#D9A32C).
-   Se activa con la prop `glow` en CategoryCard / CaseCard.
-   El efecto solo aparece cuando el cursor está encima de la tarjeta. */
+/* ── Glow de tarjetas (solo Home, solo al hover) ─────────────────── */
 .card-glow {
   transition: border-color 0.25s ease, box-shadow 0.25s ease;
 }
@@ -185,37 +161,24 @@ h1, h2, h3, h4, .font-heading {
     0 0 50px -8px rgba(217, 163, 44, 0.25);
 }
 
-/* ── Footer gradient (tono oscuro no plano) ────────────────────────
-   Degradado sutil con la colorimetría del sitio:
-   - base: bg (#15181B)
-   - matices: surface, acento dorado y técnico azul
-   Inspirado en el footer de Parfumia: no es color plano, oscila entre
-   tonos afines muy bajos de saturación. */
+/* ── Footer gradient DIAGONAL estructurado ─────────────────────────
+   Dirección ~135° (como las líneas rojas de la referencia).
+   Bandas suaves de tonos afines de la paleta del sitio:
+   bg → surface → acento dorado → técnico → surface → bg
+   Baja saturación para que se note profundidad sin parecer manchas. */
 .footer-gradient {
   background-color: var(--color-bg);
-  background-image:
-    /* Brillo suave dorado arriba-izquierda */
-    radial-gradient(
-      ellipse 80% 60% at 15% 20%,
-      color-mix(in srgb, var(--color-accent) 8%, transparent) 0%,
-      transparent 55%
-    ),
-    /* Toque técnico (azul) arriba-derecha */
-    radial-gradient(
-      ellipse 70% 55% at 85% 15%,
-      color-mix(in srgb, var(--color-technical) 7%, transparent) 0%,
-      transparent 50%
-    ),
-    /* Surface un poco más clara en el centro-abajo */
-    radial-gradient(
-      ellipse 90% 70% at 50% 85%,
-      color-mix(in srgb, var(--color-surface) 55%, transparent) 0%,
-      transparent 60%
-    ),
-    /* Viñeta oscura en los bordes para profundidad */
-    radial-gradient(
-      ellipse 100% 100% at 50% 50%,
-      transparent 40%,
-      color-mix(in srgb, #0a0c0e 40%, transparent) 100%
-    );
+  background-image: linear-gradient(
+    135deg,
+    #0f1114 0%,
+    #15181B 12%,
+    color-mix(in srgb, var(--color-surface) 70%, #15181B) 22%,
+    color-mix(in srgb, var(--color-accent) 6%, #1a1d21) 32%,
+    color-mix(in srgb, var(--color-surface) 55%, #12151a) 42%,
+    color-mix(in srgb, var(--color-technical) 5%, #161a1e) 52%,
+    color-mix(in srgb, var(--color-surface) 40%, #14171b) 62%,
+    color-mix(in srgb, var(--color-accent) 4%, #181b1f) 72%,
+    #15181B 85%,
+    #0e1013 100%
+  );
 }
