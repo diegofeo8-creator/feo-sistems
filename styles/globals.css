@@ -158,15 +158,27 @@ h1, h2, h3, h4, .font-heading {
     0 0 50px -8px rgba(217, 163, 44, 0.25);
 }
 
-/* ── Footer gradient DIAGONAL suave ────────────────────────────────
-   Solo 4 paradas, ángulo 135°. Difuminado lento, sin bandas. */
+/* ── Footer gradient DIAGONAL moderno ──────────────────────────────
+   Dorado y técnico bien separados, centro más oscuro.
+   Efecto de capas semitransparentes (glass / depth). */
 .footer-gradient {
-  background-color: var(--color-bg);
-  background-image: linear-gradient(
-    135deg,
-    #0e1013 0%,
-    color-mix(in srgb, var(--color-accent) 5%, #171a1e) 35%,
-    color-mix(in srgb, var(--color-technical) 4%, #1a1e22) 65%,
-    #0f1215 100%
-  );
+  background-color: #0c0e11;
+  background-image:
+    /* Capa 1: barrido diagonal principal (lento) */
+    linear-gradient(
+      135deg,
+      #0c0e11 0%,
+      color-mix(in srgb, var(--color-accent) 7%, #12151a) 18%,
+      #0e1014 38%,
+      #0d0f13 50%,
+      color-mix(in srgb, var(--color-technical) 6%, #12161a) 72%,
+      #0c0e11 100%
+    ),
+    /* Capa 2: velo suave (transparencia desenfocada) */
+    linear-gradient(
+      160deg,
+      transparent 0%,
+      color-mix(in srgb, var(--color-surface) 18%, transparent) 40%,
+      transparent 70%
+    );
 }

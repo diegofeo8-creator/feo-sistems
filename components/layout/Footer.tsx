@@ -69,8 +69,9 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-border/60">
-        <div className="max-w-6xl mx-auto px-6 py-4 text-xs text-muted">
+      {/* Línea solo del ancho del contenido, no de todo el footer */}
+      <div className="max-w-6xl mx-auto px-6">
+        <div className="border-t border-border/50 py-4 text-xs text-muted">
           © {new Date().getFullYear()} Feo & Sistems. Todos los derechos reservados.
         </div>
       </div>
