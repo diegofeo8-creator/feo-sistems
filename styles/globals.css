@@ -184,3 +184,38 @@ h1, h2, h3, h4, .font-heading {
     0 0 22px -2px rgba(217, 163, 44, 0.45),
     0 0 50px -8px rgba(217, 163, 44, 0.25);
 }
+
+/* ── Footer gradient (tono oscuro no plano) ────────────────────────
+   Degradado sutil con la colorimetría del sitio:
+   - base: bg (#15181B)
+   - matices: surface, acento dorado y técnico azul
+   Inspirado en el footer de Parfumia: no es color plano, oscila entre
+   tonos afines muy bajos de saturación. */
+.footer-gradient {
+  background-color: var(--color-bg);
+  background-image:
+    /* Brillo suave dorado arriba-izquierda */
+    radial-gradient(
+      ellipse 80% 60% at 15% 20%,
+      color-mix(in srgb, var(--color-accent) 8%, transparent) 0%,
+      transparent 55%
+    ),
+    /* Toque técnico (azul) arriba-derecha */
+    radial-gradient(
+      ellipse 70% 55% at 85% 15%,
+      color-mix(in srgb, var(--color-technical) 7%, transparent) 0%,
+      transparent 50%
+    ),
+    /* Surface un poco más clara en el centro-abajo */
+    radial-gradient(
+      ellipse 90% 70% at 50% 85%,
+      color-mix(in srgb, var(--color-surface) 55%, transparent) 0%,
+      transparent 60%
+    ),
+    /* Viñeta oscura en los bordes para profundidad */
+    radial-gradient(
+      ellipse 100% 100% at 50% 50%,
+      transparent 40%,
+      color-mix(in srgb, #0a0c0e 40%, transparent) 100%
+    );
+}

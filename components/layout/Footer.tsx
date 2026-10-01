@@ -4,7 +4,7 @@ import BrandMarquee from "./BrandMarquee";
 
 export default function Footer() {
   return (
-    <footer className="border-t border-border mt-6">
+    <footer className="footer-gradient border-t border-border mt-6">
       {/* Carrusel de marcas — visible en todas las páginas */}
       <BrandMarquee />
 
@@ -69,7 +69,7 @@ export default function Footer() {
         </div>
       </div>
 
-      <div className="border-t border-border">
+      <div className="border-t border-border/60">
         <div className="max-w-6xl mx-auto px-6 py-4 text-xs text-muted">
           © {new Date().getFullYear()} Feo & Sistems. Todos los derechos reservados.
         </div>
