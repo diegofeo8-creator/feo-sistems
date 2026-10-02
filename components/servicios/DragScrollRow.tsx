@@ -8,9 +8,10 @@ interface DragScrollRowProps {
 }
 
 /**
- * Carrusel horizontal con arrastre + inercia.
+ * Carrusel horizontal con arrastre + inercia (mouse).
+ * En touch/móvil usa scroll nativo horizontal (pan-x) para que deslice bien.
  * - Click en tarjeta → navega (no interfiere con <Link>)
- * - Arrastre > 15px → scroll + inercia al soltar; el click se cancela solo entonces
+ * - Arrastre mouse > 15px → scroll + inercia al soltar
  */
 export default function DragScrollRow({ children, className = "" }: DragScrollRowProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -67,7 +68,10 @@ export default function DragScrollRow({ children, className = "" }: DragScrollRo
     };
 
     const onPointerDown = (e: PointerEvent) => {
+      // En touch/móvil dejamos el scroll nativo del navegador
+      if (e.pointerType === "touch") return;
       if (e.pointerType === "mouse" && e.button !== 0) return;
+
       stopInertia();
       clearSuppress();
       down = true;
@@ -77,11 +81,13 @@ export default function DragScrollRow({ children, className = "" }: DragScrollRo
       lastX = e.clientX;
       lastT = performance.now();
       velocity = 0;
-      // NO setPointerCapture acá: si no, el <Link> no recibe el click.
     };
 
     const onPointerMove = (e: PointerEvent) => {
       if (!down) return;
+      // Solo mouse (y pen); touch no entra por el early-return de pointerdown
+      if (e.pointerType === "touch") return;
+
       const dx = e.clientX - startX;
       const now = performance.now();
 
@@ -89,7 +95,6 @@ export default function DragScrollRow({ children, className = "" }: DragScrollRo
         if (Math.abs(dx) < 15) return;
         dragged = true;
         el.dataset.dragging = "true";
-        // A partir de acá sí capturamos para no perder el gesto
         try {
           el.setPointerCapture(e.pointerId);
         } catch {
@@ -122,7 +127,6 @@ export default function DragScrollRow({ children, className = "" }: DragScrollRo
 
       if (dragged) {
         startInertia();
-        // Cancelar SOLO el click inmediato posterior al arrastre
         suppressClickHandler = (ev: MouseEvent) => {
           ev.preventDefault();
           ev.stopPropagation();
@@ -162,7 +166,9 @@ export default function DragScrollRow({ children, className = "" }: DragScrollRo
       style={{
         scrollbarWidth: "none",
         msOverflowStyle: "none",
-        touchAction: "pan-y",
+        // pan-x: scroll horizontal nativo en móvil; pan-y: no bloquea el scroll de la página
+        touchAction: "pan-x pan-y",
+        WebkitOverflowScrolling: "touch",
       }}
     >
       {children}

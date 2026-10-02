@@ -22,10 +22,13 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
+  // Glass activo si scrolleaste O si el menú móvil está abierto
+  const glass = scrolled || menuOpen;
+
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
-        scrolled ? "bg-bg/90 backdrop-blur border-b border-border" : "bg-transparent"
+        glass ? "bg-bg/90 backdrop-blur border-b border-border" : "bg-transparent"
       }`}
     >
       <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">

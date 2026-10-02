@@ -39,12 +39,12 @@ export default function MobileMenu({ open, onClose, links }: MobileMenuProps) {
     <div
       ref={containerRef}
       id="mobile-menu"
-      className="fixed inset-0 z-50 bg-bg flex flex-col md:hidden"
+      className="fixed inset-0 z-50 bg-bg/90 backdrop-blur-md flex flex-col md:hidden"
       role="dialog"
       aria-modal="true"
       aria-label="Menú de navegación"
     >
-      <div className="flex items-center justify-between px-6 h-20">
+      <div className="flex items-center justify-between px-6 h-20 border-b border-border/50">
         <span className="font-heading font-bold text-paper">Feo & Sistems</span>
         <button ref={closeButtonRef} aria-label="Cerrar menú" onClick={onClose} className="text-paper">
           <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
@@ -58,7 +58,7 @@ export default function MobileMenu({ open, onClose, links }: MobileMenuProps) {
             key={link.href}
             href={link.href}
             onClick={onClose}
-            className="font-heading text-3xl text-paper py-4 border-b border-border"
+            className="font-heading text-3xl text-paper py-4 border-b border-border/60 hover:text-accent transition-colors"
           >
             {link.label}
           </Link>
