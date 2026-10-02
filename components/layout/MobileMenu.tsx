@@ -2,6 +2,7 @@
 
 import Link from "next/link";
 import { useEffect, useRef } from "react";
+import { createPortal } from "react-dom";
 import { useFocusTrap } from "@/lib/useFocusTrap";
 
 interface MobileMenuProps {
@@ -12,10 +13,9 @@ interface MobileMenuProps {
 
 export default function MobileMenu({ open, onClose, links }: MobileMenuProps) {
   const containerRef = useRef<HTMLDivElement>(null);
+  const firstLinkRef = useRef<HTMLAnchorElement>(null);
   const closeButtonRef = useRef<HTMLButtonElement>(null);
 
-  // Bloquea el scroll del fondo mientras el menú está abierto,
-  // y permite cerrar con la tecla Escape (accesibilidad de teclado).
   useEffect(() => {
     if (!open) return;
     document.body.style.overflow = "hidden";
@@ -29,36 +29,54 @@ export default function MobileMenu({ open, onClose, links }: MobileMenuProps) {
     };
   }, [open, onClose]);
 
-  // Mantiene el foco de teclado dentro del panel mientras está abierto,
-  // y lo devuelve al botón "Abrir menú" del Header al cerrarlo.
   useFocusTrap(open, containerRef, closeButtonRef);
 
   if (!open) return null;
 
-  return (
+  // Portal a body: evita que backdrop-blur del <header> atrape position:fixed
+  const panel = (
     <div
       ref={containerRef}
       id="mobile-menu"
-      className="fixed inset-0 z-50 bg-bg/90 backdrop-blur-md flex flex-col md:hidden"
+      className="fixed inset-0 z-[60] flex flex-col md:hidden bg-bg"
       role="dialog"
       aria-modal="true"
       aria-label="Menú de navegación"
     >
-      <div className="flex items-center justify-between px-6 h-20 border-b border-border/50">
-        <span className="font-heading font-bold text-paper">Feo & Sistems</span>
-        <button ref={closeButtonRef} aria-label="Cerrar menú" onClick={onClose} className="text-paper">
-          <svg width="24" height="24" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
+      {/* Barra superior propia (única): logo + cerrar */}
+      <div className="flex items-center justify-between px-6 h-20 shrink-0 border-b border-border">
+        <span className="font-heading font-bold text-paper text-3xl tracking-tight">
+          Feo & Sistems
+        </span>
+        <button
+          ref={closeButtonRef}
+          type="button"
+          aria-label="Cerrar menú"
+          onClick={onClose}
+          className="text-paper p-1"
+        >
+          <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <path
+              d="M6 6l12 12M18 6L6 18"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+            />
           </svg>
         </button>
       </div>
-      <nav aria-label="Navegación principal" className="flex flex-col gap-1 px-6 mt-8">
-        {links.map((link) => (
+
+      <nav
+        aria-label="Navegación principal"
+        className="flex flex-col gap-1 px-6 pt-6 pb-10 overflow-y-auto flex-1"
+      >
+        {links.map((link, i) => (
           <Link
             key={link.href}
+            ref={i === 0 ? firstLinkRef : undefined}
             href={link.href}
             onClick={onClose}
-            className="font-heading text-3xl text-paper py-4 border-b border-border/60 hover:text-accent transition-colors"
+            className="font-heading text-3xl text-paper py-4 border-b border-border hover:text-accent transition-colors"
           >
             {link.label}
           </Link>
@@ -66,4 +84,7 @@ export default function MobileMenu({ open, onClose, links }: MobileMenuProps) {
       </nav>
     </div>
   );
+
+  if (typeof document === "undefined") return null;
+  return createPortal(panel, document.body);
 }

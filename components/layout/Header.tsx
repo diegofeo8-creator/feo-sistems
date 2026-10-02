@@ -22,13 +22,12 @@ export default function Header() {
     return () => window.removeEventListener("scroll", onScroll);
   }, []);
 
-  // Glass activo si scrolleaste O si el menú móvil está abierto
   const glass = scrolled || menuOpen;
 
   return (
     <header
       className={`fixed top-0 left-0 right-0 z-50 transition-colors duration-300 ${
-        glass ? "bg-bg/90 backdrop-blur border-b border-border" : "bg-transparent"
+        glass ? "bg-bg/90 backdrop-blur-md border-b border-border" : "bg-transparent"
       }`}
     >
       <div className="max-w-6xl mx-auto px-6 h-20 flex items-center justify-between">
@@ -55,19 +54,22 @@ export default function Header() {
           </Link>
         </nav>
 
+        {/* En móvil: hamburguesa. Al abrir, el panel (portal) trae su propia X. */}
         <button
-          aria-label={menuOpen ? "Cerrar menú" : "Abrir menú"}
+          type="button"
+          aria-label="Abrir menú"
           aria-expanded={menuOpen}
           aria-controls="mobile-menu"
-          className="md:hidden text-paper"
-          onClick={() => setMenuOpen((v) => !v)}
+          className={`md:hidden text-paper p-1 ${menuOpen ? "invisible" : ""}`}
+          onClick={() => setMenuOpen(true)}
         >
           <svg width="26" height="26" viewBox="0 0 24 24" fill="none" aria-hidden="true">
-            {menuOpen ? (
-              <path d="M6 6l12 12M18 6L6 18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-            ) : (
-              <path d="M3 6h18M3 12h18M3 18h18" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
-            )}
+            <path
+              d="M3 6h18M3 12h18M3 18h18"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+            />
           </svg>
         </button>
       </div>
