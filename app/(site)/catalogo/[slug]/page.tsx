@@ -2,6 +2,7 @@ import type { Metadata } from "next";
 import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
+import ProductGallery from "@/components/catalogo/ProductGallery";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -64,19 +65,17 @@ export default async function ArticuloDetailPage({ params }: Props) {
     id: number;
     url: string;
     alt: string | null;
-    order: number;
+    order?: number;
   }[];
 
-  const photos = [...mediaRaw].sort((a, b) => a.order - b.order);
+  const photos = [...mediaRaw].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
   const gallery =
     photos.length > 0
-      ? photos
+      ? photos.map((p) => ({ id: p.id, url: p.url, alt: p.alt }))
       : art.cover_image
-        ? [{ id: 0, url: art.cover_image, alt: art.title, order: 0 }]
+        ? [{ id: 0, url: art.cover_image, alt: art.title }]
         : [];
-
-  const mainImage = gallery[0]?.url ?? null;
 
   const waNumber = "541166924507";
   const waMessage = encodeURIComponent(
@@ -106,41 +105,8 @@ export default async function ArticuloDetailPage({ params }: Props) {
       </nav>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
-        {/* Galería */}
-        <div className="space-y-3">
-          <div className="relative aspect-square rounded-xl overflow-hidden bg-surface border border-border">
-            {mainImage ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={mainImage}
-                alt={art.title}
-                className="absolute inset-0 w-full h-full object-cover"
-              />
-            ) : (
-              <div className="absolute inset-0 flex items-center justify-center">
-                <span className="font-heading text-muted text-sm">Sin imagen</span>
-              </div>
-            )}
-          </div>
-
-          {gallery.length > 1 && (
-            <div className="grid grid-cols-4 sm:grid-cols-5 gap-2">
-              {gallery.map((photo) => (
-                <div
-                  key={photo.id}
-                  className="relative aspect-square rounded-lg overflow-hidden border border-border bg-surface"
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={photo.url}
-                    alt={photo.alt ?? art.title}
-                    className="absolute inset-0 w-full h-full object-cover"
-                  />
-                </div>
-              ))}
-            </div>
-          )}
-        </div>
+        {/* Galería interactiva */}
+        <ProductGallery photos={gallery} title={art.title} />
 
         {/* Info */}
         <div className="flex flex-col">
