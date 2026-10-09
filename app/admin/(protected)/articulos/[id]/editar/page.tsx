@@ -3,8 +3,9 @@ import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
 import {
   updateArticle,
-  uploadCoverImage,
-  removeCoverImage,
+  uploadMedia,
+  deleteMedia,
+  setCoverFromMedia,
 } from "../../actions";
 
 export const dynamic = "force-dynamic";
@@ -28,11 +29,12 @@ export default async function EditarArticuloPage({
 
   const supabase = await createClient();
 
-  const [{ data: articulo }, { data: productos }] = await Promise.all([
-    supabase
-      .from("articulos_categoria")
-      .select(
-        `
+  const [{ data: articulo }, { data: productos }, { data: media }] =
+    await Promise.all([
+      supabase
+        .from("articulos_categoria")
+        .select(
+          `
         id,
         title,
         slug,
@@ -42,17 +44,22 @@ export default async function EditarArticuloPage({
         published,
         category_id
       `
-      )
-      .eq("id", articleId)
-      .maybeSingle(),
-    supabase.from("productos").select("id, name").order("name"),
-  ]);
+        )
+        .eq("id", articleId)
+        .maybeSingle(),
+      supabase.from("productos").select("id, name").order("name"),
+      supabase
+        .from("articulos_media")
+        .select("id, url, alt, order")
+        .eq("articulo_id", articleId)
+        .order("order", { ascending: true }),
+    ]);
 
   if (!articulo) notFound();
 
   const boundUpdate = updateArticle.bind(null, articulo.id);
-  const boundUpload = uploadCoverImage.bind(null, articulo.id);
-  const boundRemove = removeCoverImage.bind(null, articulo.id);
+  const boundUpload = uploadMedia.bind(null, articulo.id);
+  const photos = media ?? [];
 
   return (
     <div className="space-y-12">
@@ -184,64 +191,101 @@ export default async function EditarArticuloPage({
             >
               Cancelar
             </Link>
+            <Link
+              href={`/catalogo/${articulo.slug}`}
+              target="_blank"
+              className="font-heading text-sm text-muted hover:text-accent ml-auto"
+            >
+              Ver en el sitio →
+            </Link>
           </div>
         </form>
       </div>
 
-      {/* ── Imagen de portada ─────────────────────────────────────── */}
-      <div className="max-w-2xl border-t border-border pt-8">
-        <h2 className="font-heading font-bold text-xl mb-4">
-          Imagen de portada
+      {/* ── Galería de fotos ───────────────────────────────────────── */}
+      <div className="max-w-3xl border-t border-border pt-8">
+        <h2 className="font-heading font-bold text-xl mb-2">
+          Fotos del producto ({photos.length})
         </h2>
+        <p className="text-muted text-sm mb-6">
+          Podés subir varias. La que marques como principal se muestra en las
+          tarjetas del catálogo.
+        </p>
 
-        {articulo.cover_image ? (
-          <div className="mb-6 space-y-3">
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={articulo.cover_image}
-              alt={`Portada de ${articulo.title}`}
-              className="max-w-xs rounded-sm border border-border"
-            />
-            <form action={boundRemove}>
-              <button
-                type="submit"
-                className="text-sm text-red-400/80 hover:text-red-400"
-              >
-                Eliminar imagen actual
-              </button>
-            </form>
+        {photos.length > 0 && (
+          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
+            {photos.map((photo) => {
+              const isCover = articulo.cover_image === photo.url;
+              return (
+                <div
+                  key={photo.id}
+                  className={`relative group rounded-sm border overflow-hidden ${
+                    isCover ? "border-accent ring-1 ring-accent/40" : "border-border"
+                  }`}
+                >
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={photo.url}
+                    alt={photo.alt ?? ""}
+                    className="w-full aspect-square object-cover"
+                  />
+                  {isCover && (
+                    <span className="absolute top-1 left-1 bg-accent text-bg text-[10px] font-heading font-semibold px-1.5 py-0.5 rounded-sm">
+                      Principal
+                    </span>
+                  )}
+                  <div className="absolute inset-x-0 bottom-0 bg-bg/90 p-1.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
+                    {!isCover && (
+                      <form action={setCoverFromMedia.bind(null, photo.id, articulo.id)}>
+                        <button
+                          type="submit"
+                          className="text-[10px] font-heading text-paper hover:text-accent px-1"
+                        >
+                          Principal
+                        </button>
+                      </form>
+                    )}
+                    <form action={deleteMedia.bind(null, photo.id, articulo.id)}>
+                      <button
+                        type="submit"
+                        className="text-[10px] font-heading text-red-400/80 hover:text-red-400 px-1"
+                      >
+                        Eliminar
+                      </button>
+                    </form>
+                  </div>
+                </div>
+              );
+            })}
           </div>
-        ) : (
-          <p className="text-muted text-sm mb-4">
-            Todavía no tiene imagen de portada.
-          </p>
         )}
 
-        <form action={boundUpload} className="space-y-4">
+        <form action={boundUpload} className="space-y-4" encType="multipart/form-data">
           <div>
             <label
-              htmlFor="cover"
+              htmlFor="files"
               className="block font-heading text-sm text-paper mb-1"
             >
-              {articulo.cover_image ? "Reemplazar imagen" : "Subir imagen"}
+              Agregar fotos
             </label>
             <input
-              id="cover"
-              name="cover"
+              id="files"
+              name="files"
               type="file"
               accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
+              multiple
               required
               className="w-full text-sm text-muted file:mr-4 file:py-2 file:px-4 file:rounded-sm file:border-0 file:bg-surface file:text-paper file:font-heading file:text-sm hover:file:bg-border"
             />
             <p className="text-muted text-xs mt-1">
-              JPG, PNG, WebP, GIF o AVIF. Máximo 8 MB.
+              Podés seleccionar varias a la vez. JPG, PNG, WebP, GIF o AVIF. Máx. 8 MB c/u.
             </p>
           </div>
           <button
             type="submit"
             className="font-heading text-sm font-semibold border border-border text-paper px-4 py-2 rounded-sm hover:border-accent hover:text-accent transition-colors"
           >
-            Subir imagen
+            Subir fotos
           </button>
         </form>
       </div>
