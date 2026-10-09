@@ -23,7 +23,8 @@ export default function ProductCard({
       href={`/productos/${slug}`}
       className="group flex h-full flex-col bg-surface border border-border rounded-xl overflow-hidden hover:border-accent/50 transition-colors"
     >
-      <div className="relative h-40 shrink-0 bg-border overflow-hidden">
+      {/* Contenedor panorámico 21:9 */}
+      <div className="relative aspect-[21/9] shrink-0 bg-border overflow-hidden">
         {image ? (
           <Image
             src={image}
@@ -34,7 +35,9 @@ export default function ProductCard({
           />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-surface">
-            <span className="font-heading text-muted text-xs tracking-wide">Sin imagen</span>
+            <span className="font-heading text-muted text-xs tracking-wide">
+              Sin imagen
+            </span>
           </div>
         )}
       </div>
