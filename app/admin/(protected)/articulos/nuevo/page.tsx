@@ -35,7 +35,7 @@ export default async function NuevoArticuloPage({
         </p>
       )}
 
-      <form action={createArticle} className="max-w-2xl space-y-6" encType="multipart/form-data">
+      <form action={createArticle} className="max-w-2xl space-y-6">
         <div>
           <label
             htmlFor="title"
@@ -111,26 +111,10 @@ export default async function NuevoArticuloPage({
           </div>
         </div>
 
-        {/* Fotos del producto — misma sección que el resto de campos */}
-        <div>
-          <label
-            htmlFor="cover"
-            className="block font-heading text-sm text-paper mb-1"
-          >
-            Fotos del producto
-          </label>
-          <input
-            id="cover"
-            name="cover"
-            type="file"
-            accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
-            multiple
-            className="w-full text-sm text-muted file:mr-4 file:py-2 file:px-4 file:rounded-sm file:border-0 file:bg-surface file:text-paper file:font-heading file:text-sm hover:file:bg-border"
-          />
-          <p className="text-muted text-xs mt-1">
-            Podés elegir varias. JPG, PNG, WebP, GIF o AVIF. Máx. 8 MB c/u. (Opcional)
-          </p>
-        </div>
+        <p className="text-muted text-sm border border-border rounded-sm px-4 py-3">
+          Después de crear el artículo vas a poder subir las fotos en alta
+          resolución (subida directa a Supabase, sin límite de Vercel).
+        </p>
 
         <div className="flex items-center gap-3">
           <input

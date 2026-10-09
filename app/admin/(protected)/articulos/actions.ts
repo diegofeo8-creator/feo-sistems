@@ -2,7 +2,6 @@
 
 import { revalidatePath } from "next/cache";
 import { redirect } from "next/navigation";
-import { randomUUID } from "crypto";
 import { createClient } from "@/lib/supabase/server";
 
 function slugify(text: string) {
@@ -81,15 +80,6 @@ function validateFields(fields: ArticleFormFields): string | null {
   return null;
 }
 
-const ALLOWED_IMAGE_TYPES: Record<string, string> = {
-  "image/jpeg": "jpg",
-  "image/png": "png",
-  "image/webp": "webp",
-  "image/gif": "gif",
-  "image/avif": "avif",
-};
-const MAX_IMAGE_BYTES = 8 * 1024 * 1024;
-
 async function tryDeleteStorageFile(
   supabase: Awaited<ReturnType<typeof createClient>>,
   publicUrl: string | null | undefined
@@ -108,39 +98,7 @@ async function tryDeleteStorageFile(
   }
 }
 
-async function uploadFileToStorage(
-  supabase: Awaited<ReturnType<typeof createClient>>,
-  articleId: number,
-  file: File
-): Promise<{ url: string } | { error: string }> {
-  const ext = ALLOWED_IMAGE_TYPES[file.type];
-  if (!ext) {
-    return {
-      error: `"${file.name}": tipo no permitido. Solo JPG, PNG, WebP, GIF o AVIF.`,
-    };
-  }
-  if (file.size > MAX_IMAGE_BYTES) {
-    return { error: `"${file.name}": supera el límite de 8 MB.` };
-  }
-
-  const path = `articulos/${articleId}/${randomUUID()}.${ext}`;
-  const { error } = await supabase.storage.from("case-media").upload(path, file, {
-    contentType: file.type,
-    upsert: false,
-  });
-
-  if (error) {
-    return { error: `"${file.name}": ${error.message}` };
-  }
-
-  const {
-    data: { publicUrl },
-  } = supabase.storage.from("case-media").getPublicUrl(path);
-
-  return { url: publicUrl };
-}
-
-// ── CRUD principal ──────────────────────────────────────────────────
+// ── CRUD principal (sin archivos por Server Action) ─────────────────
 
 export async function createArticle(formData: FormData) {
   await requireUser();
@@ -175,39 +133,11 @@ export async function createArticle(formData: FormData) {
     );
   }
 
-  const rawFiles = formData.getAll("cover");
-  const files = rawFiles.filter((f): f is File => f instanceof File && f.size > 0);
-
-  let firstUrl: string | null = null;
-  let order = 0;
-
-  for (const file of files) {
-    const result = await uploadFileToStorage(supabase, data.id, file);
-    if ("error" in result) continue;
-
-    await supabase.from("articulos_media").insert({
-      articulo_id: data.id,
-      url: result.url,
-      alt: fields.title,
-      order,
-    });
-
-    if (!firstUrl) firstUrl = result.url;
-    order += 1;
-  }
-
-  if (firstUrl) {
-    await supabase
-      .from("articulos_categoria")
-      .update({ cover_image: firstUrl })
-      .eq("id", data.id);
-  }
-
   revalidatePath("/admin");
   revalidatePath("/admin/articulos");
   redirect(
     `/admin/articulos/${data.id}/editar?success=${encodeURIComponent(
-      `Artículo "${fields.title}" creado correctamente.`
+      `Artículo "${fields.title}" creado. Ahora podés subir las fotos.`
     )}`
   );
 }
@@ -292,94 +222,61 @@ export async function togglePublish(articleId: number, published: boolean) {
   revalidatePath("/admin/articulos");
 }
 
-// ── Galería de fotos (articulos_media) ───────────────────────────────
+// ── Media: solo metadatos (el archivo ya está en Storage vía cliente) ─
 
-export async function uploadMedia(articleId: number, formData: FormData) {
+/** Registra una foto ya subida por el cliente. Devuelve { id } o { error }. */
+export async function registerMedia(payload: {
+  articleId: number;
+  url: string;
+  alt?: string;
+  order?: number;
+}): Promise<{ id?: number; error?: string }> {
   const { supabase } = await requireUser();
-  const editarUrl = `/admin/articulos/${articleId}/editar`;
+  const { articleId, url, alt, order = 0 } = payload;
 
-  const rawFiles = formData.getAll("files");
-  const files = rawFiles.filter((f): f is File => f instanceof File && f.size > 0);
-
-  if (files.length === 0) {
-    redirect(`${editarUrl}?error=${encodeURIComponent("No se seleccionó ninguna imagen.")}`);
+  if (!url || !articleId) {
+    return { error: "Datos incompletos." };
   }
 
-  const { data: existing } = await supabase
+  const { data, error } = await supabase
     .from("articulos_media")
-    .select('id, "order"')
-    .eq("articulo_id", articleId);
-
-  const maxOrder = ((existing ?? []) as { order?: number }[]).reduce(
-    (max, row) => Math.max(max, row.order ?? 0),
-    -1
-  );
-  let nextOrder = maxOrder + 1;
-  const errors: string[] = [];
-  let uploaded = 0;
-  let firstNewUrl: string | null = null;
-
-  for (const file of files) {
-    const result = await uploadFileToStorage(supabase, articleId, file);
-    if ("error" in result) {
-      errors.push(result.error);
-      continue;
-    }
-
-    const { error: insertError } = await supabase.from("articulos_media").insert({
+    .insert({
       articulo_id: articleId,
-      url: result.url,
-      alt: file.name.replace(/\.[^.]+$/, ""),
-      order: nextOrder,
-    });
+      url,
+      alt: alt ?? null,
+      order,
+    })
+    .select("id")
+    .single();
 
-    if (insertError) {
-      errors.push(`${file.name}: ${insertError.message}`);
-      continue;
-    }
-
-    if (!firstNewUrl) firstNewUrl = result.url;
-    uploaded += 1;
-    nextOrder += 1;
+  if (error || !data) {
+    return { error: error?.message ?? "No se pudo registrar la foto." };
   }
 
-  if (firstNewUrl) {
-    const { data: art } = await supabase
+  const { data: art } = await supabase
+    .from("articulos_categoria")
+    .select("cover_image")
+    .eq("id", articleId)
+    .single();
+
+  if (!art?.cover_image) {
+    await supabase
       .from("articulos_categoria")
-      .select("cover_image")
-      .eq("id", articleId)
-      .single();
-
-    if (!art?.cover_image) {
-      await supabase
-        .from("articulos_categoria")
-        .update({ cover_image: firstNewUrl })
-        .eq("id", articleId);
-    }
+      .update({ cover_image: url })
+      .eq("id", articleId);
   }
 
-  revalidatePath(editarUrl);
+  revalidatePath(`/admin/articulos/${articleId}/editar`);
   revalidatePath("/admin/articulos");
-
-  if (uploaded === 0) {
-    redirect(
-      `${editarUrl}?error=${encodeURIComponent(
-        errors.length > 0 ? errors.join(" ") : "No se pudo subir ningún archivo."
-      )}`
-    );
-  }
-
-  const okMsg =
-    uploaded === 1
-      ? "1 foto subida correctamente."
-      : `${uploaded} fotos subidas correctamente.`;
-  const warn = errors.length > 0 ? ` Algunas fallaron: ${errors.join(" ")}` : "";
-  redirect(`${editarUrl}?success=${encodeURIComponent(okMsg + warn)}`);
+  return { id: data.id };
 }
 
-export async function deleteMedia(mediaId: number, articleId: number) {
+/** Elimina registro + archivo de Storage. */
+export async function deleteMedia(
+  mediaId: number,
+  articleId: number
+): Promise<{ error?: string }> {
   const { supabase } = await requireUser();
-  const editarUrl = `/admin/articulos/${articleId}/editar`;
 
   const { data: row } = await supabase
     .from("articulos_media")
@@ -387,7 +284,14 @@ export async function deleteMedia(mediaId: number, articleId: number) {
     .eq("id", mediaId)
     .maybeSingle();
 
-  await supabase.from("articulos_media").delete().eq("id", mediaId);
+  const { error } = await supabase
+    .from("articulos_media")
+    .delete()
+    .eq("id", mediaId);
+
+  if (error) {
+    return { error: error.message };
+  }
 
   if (row?.url) {
     await tryDeleteStorageFile(supabase, row.url);
@@ -415,14 +319,17 @@ export async function deleteMedia(mediaId: number, articleId: number) {
     }
   }
 
-  revalidatePath(editarUrl);
+  revalidatePath(`/admin/articulos/${articleId}/editar`);
   revalidatePath("/admin/articulos");
-  redirect(`${editarUrl}?success=${encodeURIComponent("Foto eliminada.")}`);
+  return {};
 }
 
-export async function setCoverFromMedia(mediaId: number, articleId: number) {
+/** Marca una foto de la galería como cover_image. */
+export async function setCoverFromMedia(
+  mediaId: number,
+  articleId: number
+): Promise<{ error?: string }> {
   const { supabase } = await requireUser();
-  const editarUrl = `/admin/articulos/${articleId}/editar`;
 
   const { data: row } = await supabase
     .from("articulos_media")
@@ -432,17 +339,19 @@ export async function setCoverFromMedia(mediaId: number, articleId: number) {
     .maybeSingle();
 
   if (!row?.url) {
-    redirect(`${editarUrl}?error=${encodeURIComponent("Foto no encontrada.")}`);
+    return { error: "Foto no encontrada." };
   }
 
-  await supabase
+  const { error } = await supabase
     .from("articulos_categoria")
     .update({ cover_image: row.url })
     .eq("id", articleId);
 
-  revalidatePath(editarUrl);
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath(`/admin/articulos/${articleId}/editar`);
   revalidatePath("/admin/articulos");
-  redirect(
-    `${editarUrl}?success=${encodeURIComponent("Imagen principal actualizada.")}`
-  );
+  return {};
 }

@@ -1,12 +1,8 @@
 import { notFound } from "next/navigation";
 import Link from "next/link";
 import { createClient } from "@/lib/supabase/server";
-import {
-  updateArticle,
-  uploadMedia,
-  deleteMedia,
-  setCoverFromMedia,
-} from "../../actions";
+import { updateArticle } from "../../actions";
+import ArticleMediaManager from "@/components/admin/ArticleMediaManager";
 
 export const dynamic = "force-dynamic";
 
@@ -47,7 +43,6 @@ export default async function EditarArticuloPage({
     .select("id, name")
     .order("name");
 
-  // "order" es palabra reservada → la pedimos entre comillas y ordenamos en JS
   const { data: mediaRaw, error: mediaError } = await supabase
     .from("articulos_media")
     .select('id, url, alt, "order"')
@@ -69,7 +64,6 @@ export default async function EditarArticuloPage({
     .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
   const boundUpdate = updateArticle.bind(null, Number(articulo.id));
-  const boundUpload = uploadMedia.bind(null, Number(articulo.id));
 
   return (
     <div className="space-y-12">
@@ -214,118 +208,11 @@ export default async function EditarArticuloPage({
         </form>
       </div>
 
-      {/* ── Galería de fotos ───────────────────────────────────────── */}
-      <div className="max-w-3xl border-t border-border pt-8">
-        <h2 className="font-heading font-bold text-xl mb-2">
-          Fotos del producto ({photos.length})
-        </h2>
-        <p className="text-muted text-sm mb-6">
-          Podés subir varias. La que marques como principal se muestra en las
-          tarjetas del catálogo.
-        </p>
-
-        {mediaError && (
-          <p className="text-red-400 text-sm mb-4">
-            No se pudieron cargar las fotos existentes: {mediaError.message}
-          </p>
-        )}
-
-        {photos.length > 0 && (
-          <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
-            {photos.map((photo) => {
-              const isCover = articulo.cover_image === photo.url;
-              return (
-                <div
-                  key={photo.id}
-                  className={`relative group rounded-sm border overflow-hidden ${
-                    isCover
-                      ? "border-accent ring-1 ring-accent/40"
-                      : "border-border"
-                  }`}
-                >
-                  {/* eslint-disable-next-line @next/next/no-img-element */}
-                  <img
-                    src={photo.url}
-                    alt={photo.alt ?? ""}
-                    className="w-full aspect-square object-cover"
-                  />
-                  {isCover && (
-                    <span className="absolute top-1 left-1 bg-accent text-bg text-[10px] font-heading font-semibold px-1.5 py-0.5 rounded-sm">
-                      Principal
-                    </span>
-                  )}
-                  <div className="absolute inset-x-0 bottom-0 bg-bg/90 p-1.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
-                    {!isCover && (
-                      <form
-                        action={setCoverFromMedia.bind(
-                          null,
-                          Number(photo.id),
-                          Number(articulo.id)
-                        )}
-                      >
-                        <button
-                          type="submit"
-                          className="text-[10px] font-heading text-paper hover:text-accent px-1"
-                        >
-                          Principal
-                        </button>
-                      </form>
-                    )}
-                    <form
-                      action={deleteMedia.bind(
-                        null,
-                        Number(photo.id),
-                        Number(articulo.id)
-                      )}
-                    >
-                      <button
-                        type="submit"
-                        className="text-[10px] font-heading text-red-400/80 hover:text-red-400 px-1"
-                      >
-                        Eliminar
-                      </button>
-                    </form>
-                  </div>
-                </div>
-              );
-            })}
-          </div>
-        )}
-
-        <form
-          action={boundUpload}
-          className="space-y-4"
-          encType="multipart/form-data"
-        >
-          <div>
-            <label
-              htmlFor="files"
-              className="block font-heading text-sm text-paper mb-1"
-            >
-              Agregar fotos
-            </label>
-            <input
-              id="files"
-              name="files"
-              type="file"
-              accept="image/jpeg,image/png,image/webp,image/gif,image/avif"
-              multiple
-              required
-              className="w-full text-sm text-muted file:mr-4 file:py-2 file:px-4 file:rounded-sm file:border-0 file:bg-surface file:text-paper file:font-heading file:text-sm hover:file:bg-border"
-            />
-            <p className="text-muted text-xs mt-1">
-              Podés seleccionar varias a la vez. JPG, PNG, WebP, GIF o AVIF.
-              Máx. 8 MB c/u.
-            </p>
-          </div>
-          <button
-            type="submit"
-            className="font-heading text-sm font-semibold border border-border text-paper px-4 py-2 rounded-sm hover:border-accent hover:text-accent transition-colors"
-          >
-            Subir fotos
-          </button>
-        </form>
-      </div>
+      <ArticleMediaManager
+        articleId={Number(articulo.id)}
+        coverImage={articulo.cover_image}
+        photos={photos}
+      />
     </div>
   );
 }
