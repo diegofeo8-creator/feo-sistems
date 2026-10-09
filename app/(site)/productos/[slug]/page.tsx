@@ -1,6 +1,5 @@
 import type { Metadata } from "next";
 import Link from "next/link";
-import Image from "next/image";
 import { notFound } from "next/navigation";
 import CaseCard from "@/components/servicios/CaseCard";
 import { getProductoConServicios, getArticulosByCategoryId } from "@/lib/queries";
@@ -30,6 +29,9 @@ export default async function ProductoDetailPage({ params }: Props) {
   const { producto, servicios } = data;
   const articulos = await getArticulosByCategoryId(producto.id);
 
+  // Solo mostramos 3 servicios relacionados en esta página
+  const serviciosPreview = servicios.slice(0, 3);
+
   return (
     <div className="pt-32 pb-24 max-w-6xl mx-auto px-6">
       <Link
@@ -39,26 +41,14 @@ export default async function ProductoDetailPage({ params }: Props) {
         ← PRODUCTOS
       </Link>
 
-      <header className="mt-4 mb-10 flex flex-col md:flex-row gap-8 items-start">
-        {producto.image && (
-          <div className="relative w-full md:w-64 h-40 shrink-0 rounded-xl overflow-hidden bg-surface border border-border">
-            <Image
-              src={producto.image}
-              alt={producto.name}
-              fill
-              sizes="256px"
-              className="object-cover"
-            />
-          </div>
+      {/* Solo título + descripción — sin foto de categoría */}
+      <header className="mt-4 mb-10">
+        <h1 className="font-heading font-bold text-paper text-4xl md:text-5xl">
+          {producto.name}
+        </h1>
+        {producto.description && (
+          <p className="text-muted mt-4 max-w-xl">{producto.description}</p>
         )}
-        <div>
-          <h1 className="font-heading font-bold text-paper text-4xl md:text-5xl">
-            {producto.name}
-          </h1>
-          {producto.description && (
-            <p className="text-muted mt-4 max-w-xl">{producto.description}</p>
-          )}
-        </div>
       </header>
 
       {/* Catálogo disponible en tienda */}
@@ -80,7 +70,6 @@ export default async function ProductoDetailPage({ params }: Props) {
                 href={`/catalogo/${art.slug}`}
                 className="group flex h-full flex-col bg-surface border border-border rounded-xl overflow-hidden hover:border-accent/50 transition-colors"
               >
-                {/* Imagen full-bleed arriba (estilo Mercado Libre) */}
                 <div className="relative aspect-square shrink-0 bg-border overflow-hidden">
                   {art.cover_image ? (
                     // eslint-disable-next-line @next/next/no-img-element
@@ -98,7 +87,6 @@ export default async function ProductoDetailPage({ params }: Props) {
                   )}
                 </div>
 
-                {/* Contenido */}
                 <div className="flex flex-1 flex-col p-4">
                   <h3 className="font-heading font-semibold text-paper text-sm leading-snug line-clamp-2 group-hover:text-accent transition-colors">
                     {art.title}
@@ -116,22 +104,34 @@ export default async function ProductoDetailPage({ params }: Props) {
         )}
       </section>
 
-      {/* Servicios técnicos relacionados */}
-      <h2 className="font-heading font-bold text-paper text-2xl mb-6 border-t border-border/40 pt-10">
-        Servicios relacionados con {producto.name}
-      </h2>
-
-      {servicios.length === 0 ? (
-        <p className="font-heading text-paper/80 border border-border rounded-sm px-6 py-10 text-center">
-          TODAVÍA NO HAY SERVICIOS PUBLICADOS PARA ESTE PRODUCTO.
-        </p>
-      ) : (
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
-          {servicios.map((s) => (
-            <CaseCard key={s.slug} {...s} />
-          ))}
+      {/* Servicios técnicos relacionados — máx. 3 + botón Ver servicios */}
+      <div className="border-t border-border/40 pt-10">
+        <div className="flex flex-wrap items-center justify-between gap-4 mb-6">
+          <h2 className="font-heading font-bold text-paper text-2xl">
+            Servicios relacionados con {producto.name}
+          </h2>
+          {servicios.length > 0 && (
+            <Link
+              href="/Servicios"
+              className="font-heading text-sm font-semibold bg-accent text-bg px-4 py-2 rounded-sm hover:opacity-90 transition-opacity shrink-0"
+            >
+              Ver servicios
+            </Link>
+          )}
         </div>
-      )}
+
+        {servicios.length === 0 ? (
+          <p className="font-heading text-paper/80 border border-border rounded-sm px-6 py-10 text-center">
+            TODAVÍA NO HAY SERVICIOS PUBLICADOS PARA ESTE PRODUCTO.
+          </p>
+        ) : (
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-5">
+            {serviciosPreview.map((s) => (
+              <CaseCard key={s.slug} {...s} />
+            ))}
+          </div>
+        )}
+      </div>
     </div>
   );
 }
