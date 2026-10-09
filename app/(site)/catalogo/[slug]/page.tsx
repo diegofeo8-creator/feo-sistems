@@ -84,7 +84,7 @@ export default async function ArticuloDetailPage({ params }: Props) {
   const waUrl = `https://wa.me/${waNumber}?text=${waMessage}`;
 
   return (
-    <div className="pt-32 pb-24 max-w-6xl mx-auto px-6">
+    <div className="pt-32 pb-24 max-w-7xl mx-auto px-4 sm:px-6">
       <nav className="flex flex-wrap items-center gap-2 text-xs font-heading text-muted mb-8">
         <Link href="/productos" className="hover:text-accent transition-colors">
           Productos
@@ -104,8 +104,8 @@ export default async function ArticuloDetailPage({ params }: Props) {
         <span className="text-paper/70 line-clamp-1">{art.title}</span>
       </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-10 lg:gap-14">
-        {/* Galería interactiva */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_1fr] gap-8 lg:gap-12">
+        {/* Galería interactiva — columna más ancha */}
         <ProductGallery photos={gallery} title={art.title} />
 
         {/* Info */}

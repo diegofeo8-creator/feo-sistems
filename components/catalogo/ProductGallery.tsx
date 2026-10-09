@@ -53,7 +53,7 @@ export default function ProductGallery({ photos, title }: Props) {
 
   if (total === 0) {
     return (
-      <div className="relative w-full aspect-[4/5] max-h-[32rem] rounded-xl overflow-hidden bg-surface border border-border">
+      <div className="relative w-full aspect-[4/5] max-h-[40rem] rounded-xl overflow-hidden bg-surface border border-border">
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="font-heading text-muted text-sm">Sin imagen</span>
         </div>
@@ -63,10 +63,10 @@ export default function ProductGallery({ photos, title }: Props) {
 
   return (
     <>
-      <div className="flex gap-3 items-start">
-        {/* Miniaturas verticales a la izquierda */}
+      <div className="flex gap-3 sm:gap-4 items-start">
+        {/* Miniaturas verticales — un poco más grandes */}
         {total > 1 && (
-          <div className="flex flex-col gap-2 shrink-0 w-14 sm:w-16 max-h-[32rem] overflow-y-auto">
+          <div className="flex flex-col gap-2.5 shrink-0 w-16 sm:w-20 max-h-[40rem] overflow-y-auto">
             {photos.map((photo, i) => (
               <button
                 key={photo.id}
@@ -91,13 +91,13 @@ export default function ProductGallery({ photos, title }: Props) {
         )}
 
         {/* Flecha izq. (afuera) + foto + flecha der. (afuera) */}
-        <div className="flex items-center gap-2 flex-1 min-w-0">
+        <div className="flex items-center gap-2 sm:gap-3 flex-1 min-w-0">
           {total > 1 && (
             <button
               type="button"
               onClick={goPrev}
               aria-label="Foto anterior"
-              className="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface border border-border text-paper flex items-center justify-center hover:bg-accent hover:text-bg hover:border-accent transition-colors"
+              className="shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-surface border border-border text-paper flex items-center justify-center hover:bg-accent hover:text-bg hover:border-accent transition-colors"
             >
               <svg
                 width="18"
@@ -114,8 +114,8 @@ export default function ProductGallery({ photos, title }: Props) {
             </button>
           )}
 
-          {/* Proporción 4:5 (más natural para productos, no cuadrado forzado) */}
-          <div className="relative flex-1 min-w-0 aspect-[4/5] max-h-[32rem] rounded-xl overflow-hidden bg-surface border border-border">
+          {/* Foto principal más grande */}
+          <div className="relative flex-1 min-w-0 aspect-[4/5] max-h-[40rem] rounded-xl overflow-hidden bg-surface border border-border">
             <button
               type="button"
               onClick={() => setLightbox(true)}
@@ -142,7 +142,7 @@ export default function ProductGallery({ photos, title }: Props) {
               type="button"
               onClick={goNext}
               aria-label="Foto siguiente"
-              className="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface border border-border text-paper flex items-center justify-center hover:bg-accent hover:text-bg hover:border-accent transition-colors"
+              className="shrink-0 w-10 h-10 sm:w-11 sm:h-11 rounded-full bg-surface border border-border text-paper flex items-center justify-center hover:bg-accent hover:text-bg hover:border-accent transition-colors"
             >
               <svg
                 width="18"
@@ -161,13 +161,13 @@ export default function ProductGallery({ photos, title }: Props) {
         </div>
       </div>
 
-      {/* Lightbox */}
+      {/* Lightbox — fondo más transparente para seguir viendo la web */}
       {lightbox && current && (
         <div
           role="dialog"
           aria-modal="true"
           aria-label="Vista ampliada"
-          className="fixed inset-0 z-[100] bg-black/90 flex items-center justify-center p-4 sm:p-8"
+          className="fixed inset-0 z-[100] bg-black/45 backdrop-blur-[2px] flex items-center justify-center p-4 sm:p-8"
           onClick={() => setLightbox(false)}
         >
           <button
@@ -243,12 +243,12 @@ export default function ProductGallery({ photos, title }: Props) {
           <img
             src={current.url}
             alt={current.alt ?? title}
-            className="max-w-full max-h-full object-contain rounded-lg"
+            className="max-w-full max-h-full object-contain rounded-lg shadow-2xl"
             onClick={(e) => e.stopPropagation()}
           />
 
           {total > 1 && (
-            <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs font-heading text-white/80 bg-black/40 px-3 py-1 rounded-full">
+            <span className="absolute bottom-4 left-1/2 -translate-x-1/2 text-xs font-heading text-white/90 bg-black/50 px-3 py-1 rounded-full">
               {active + 1} / {total}
             </span>
           )}
