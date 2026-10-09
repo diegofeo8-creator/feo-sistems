@@ -30,7 +30,6 @@ export default function ProductGallery({ photos, title }: Props) {
     setActive((i) => (i + 1) % total);
   }, [total]);
 
-  // Teclado: flechas + Escape
   useEffect(() => {
     function onKey(e: KeyboardEvent) {
       if (e.key === "ArrowLeft") goPrev();
@@ -41,7 +40,6 @@ export default function ProductGallery({ photos, title }: Props) {
     return () => window.removeEventListener("keydown", onKey);
   }, [goPrev, goNext]);
 
-  // Bloquear scroll del body cuando el lightbox está abierto
   useEffect(() => {
     if (lightbox) {
       document.body.style.overflow = "hidden";
@@ -55,7 +53,7 @@ export default function ProductGallery({ photos, title }: Props) {
 
   if (total === 0) {
     return (
-      <div className="relative aspect-square rounded-xl overflow-hidden bg-surface border border-border">
+      <div className="relative w-full aspect-[4/5] max-h-[32rem] rounded-xl overflow-hidden bg-surface border border-border">
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="font-heading text-muted text-sm">Sin imagen</span>
         </div>
@@ -65,10 +63,10 @@ export default function ProductGallery({ photos, title }: Props) {
 
   return (
     <>
-      <div className="flex gap-3">
+      <div className="flex gap-3 items-start">
         {/* Miniaturas verticales a la izquierda */}
         {total > 1 && (
-          <div className="flex flex-col gap-2 shrink-0 w-14 sm:w-16 max-h-[min(100vw,28rem)] overflow-y-auto">
+          <div className="flex flex-col gap-2 shrink-0 w-14 sm:w-16 max-h-[32rem] overflow-y-auto">
             {photos.map((photo, i) => (
               <button
                 key={photo.id}
@@ -92,78 +90,78 @@ export default function ProductGallery({ photos, title }: Props) {
           </div>
         )}
 
-        {/* Imagen principal + flechas */}
-        <div className="relative flex-1 aspect-square rounded-xl overflow-hidden bg-surface border border-border group">
-          <button
-            type="button"
-            onClick={() => setLightbox(true)}
-            className="absolute inset-0 z-0 cursor-zoom-in"
-            aria-label="Ver imagen en grande"
-          >
-            {/* eslint-disable-next-line @next/next/no-img-element */}
-            <img
-              src={current!.url}
-              alt={current!.alt ?? title}
-              className="absolute inset-0 w-full h-full object-cover"
-            />
-          </button>
-
+        {/* Flecha izq. (afuera) + foto + flecha der. (afuera) */}
+        <div className="flex items-center gap-2 flex-1 min-w-0">
           {total > 1 && (
-            <>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goPrev();
-                }}
-                aria-label="Foto anterior"
-                className="absolute left-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-bg/80 border border-border text-paper flex items-center justify-center hover:bg-accent hover:text-bg hover:border-accent transition-colors opacity-80 group-hover:opacity-100"
+            <button
+              type="button"
+              onClick={goPrev}
+              aria-label="Foto anterior"
+              className="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface border border-border text-paper flex items-center justify-center hover:bg-accent hover:text-bg hover:border-accent transition-colors"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
               >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="15 18 9 12 15 6" />
-                </svg>
-              </button>
-              <button
-                type="button"
-                onClick={(e) => {
-                  e.stopPropagation();
-                  goNext();
-                }}
-                aria-label="Foto siguiente"
-                className="absolute right-2 top-1/2 -translate-y-1/2 z-10 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-bg/80 border border-border text-paper flex items-center justify-center hover:bg-accent hover:text-bg hover:border-accent transition-colors opacity-80 group-hover:opacity-100"
-              >
-                <svg
-                  width="18"
-                  height="18"
-                  viewBox="0 0 24 24"
-                  fill="none"
-                  stroke="currentColor"
-                  strokeWidth="2.2"
-                  strokeLinecap="round"
-                  strokeLinejoin="round"
-                >
-                  <polyline points="9 18 15 12 9 6" />
-                </svg>
-              </button>
+                <polyline points="15 18 9 12 15 6" />
+              </svg>
+            </button>
+          )}
 
-              <span className="absolute bottom-2 right-2 z-10 text-[10px] font-heading bg-bg/80 text-paper px-2 py-0.5 rounded-sm border border-border">
+          {/* Proporción 4:5 (más natural para productos, no cuadrado forzado) */}
+          <div className="relative flex-1 min-w-0 aspect-[4/5] max-h-[32rem] rounded-xl overflow-hidden bg-surface border border-border">
+            <button
+              type="button"
+              onClick={() => setLightbox(true)}
+              className="absolute inset-0 cursor-zoom-in"
+              aria-label="Ver imagen en grande"
+            >
+              {/* eslint-disable-next-line @next/next/no-img-element */}
+              <img
+                src={current!.url}
+                alt={current!.alt ?? title}
+                className="absolute inset-0 w-full h-full object-cover"
+              />
+            </button>
+
+            {total > 1 && (
+              <span className="absolute bottom-2 right-2 z-10 text-[10px] font-heading bg-bg/80 text-paper px-2 py-0.5 rounded-sm border border-border pointer-events-none">
                 {active + 1} / {total}
               </span>
-            </>
+            )}
+          </div>
+
+          {total > 1 && (
+            <button
+              type="button"
+              onClick={goNext}
+              aria-label="Foto siguiente"
+              className="shrink-0 w-9 h-9 sm:w-10 sm:h-10 rounded-full bg-surface border border-border text-paper flex items-center justify-center hover:bg-accent hover:text-bg hover:border-accent transition-colors"
+            >
+              <svg
+                width="18"
+                height="18"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2.2"
+                strokeLinecap="round"
+                strokeLinejoin="round"
+              >
+                <polyline points="9 18 15 12 9 6" />
+              </svg>
+            </button>
           )}
         </div>
       </div>
 
-      {/* Lightbox a pantalla completa */}
+      {/* Lightbox */}
       {lightbox && current && (
         <div
           role="dialog"
