@@ -384,3 +384,22 @@ export async function getProductoConServicios(slug: string) {
 
   return { producto, servicios: relatedservicios };
 }
+
+export async function getArticulosByCategoryId(categoryId: string) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("articulos_categoria")
+    .select("id, title, slug, description, price, cover_image, category_id")
+    .eq("category_id", categoryId)
+    .eq("published", true)
+    .order("created_at", { ascending: false })
+    .range(0, 31); // Límite estricto de 32 artículos por página
+
+  if (error) {
+    console.error("Error al leer artículos de la categoría:", error.message);
+    return [];
+  }
+
+  return data ?? [];
+}

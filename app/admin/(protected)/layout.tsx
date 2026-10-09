@@ -22,6 +22,12 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               Casos
             </Link>
             <Link
+              href="/admin/articulos"
+              className="font-heading text-sm text-paper/80 hover:text-accent"
+            >
+              Catálogo
+            </Link>
+            <Link
               href="/admin/casos/nuevo"
               className="font-heading text-sm font-semibold bg-accent text-bg px-3 py-1.5 rounded-sm hover:opacity-90"
             >
