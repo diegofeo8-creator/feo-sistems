@@ -307,12 +307,14 @@ export async function uploadMedia(articleId: number, formData: FormData) {
 
   const { data: existing } = await supabase
     .from("articulos_media")
-    .select("order")
-    .eq("articulo_id", articleId)
-    .order("order", { ascending: false })
-    .limit(1);
+    .select('id, "order"')
+    .eq("articulo_id", articleId);
 
-  let nextOrder = (existing?.[0]?.order ?? -1) + 1;
+  const maxOrder = ((existing ?? []) as { order?: number }[]).reduce(
+    (max, row) => Math.max(max, row.order ?? 0),
+    -1
+  );
+  let nextOrder = maxOrder + 1;
   const errors: string[] = [];
   let uploaded = 0;
   let firstNewUrl: string | null = null;
@@ -397,17 +399,18 @@ export async function deleteMedia(mediaId: number, articleId: number) {
       .single();
 
     if (art?.cover_image === row.url) {
-      const { data: next } = await supabase
+      const { data: remaining } = await supabase
         .from("articulos_media")
-        .select("url")
-        .eq("articulo_id", articleId)
-        .order("order", { ascending: true })
-        .limit(1)
-        .maybeSingle();
+        .select('url, "order"')
+        .eq("articulo_id", articleId);
+
+      const sorted = ((remaining ?? []) as { url: string; order?: number }[])
+        .slice()
+        .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
 
       await supabase
         .from("articulos_categoria")
-        .update({ cover_image: next?.url ?? null })
+        .update({ cover_image: sorted[0]?.url ?? null })
         .eq("id", articleId);
     }
   }

@@ -29,37 +29,47 @@ export default async function EditarArticuloPage({
 
   const supabase = await createClient();
 
-  const [{ data: articulo }, { data: productos }, { data: media }] =
-    await Promise.all([
-      supabase
-        .from("articulos_categoria")
-        .select(
-          `
-        id,
-        title,
-        slug,
-        description,
-        price,
-        cover_image,
-        published,
-        category_id
-      `
-        )
-        .eq("id", articleId)
-        .maybeSingle(),
-      supabase.from("productos").select("id, name").order("name"),
-      supabase
-        .from("articulos_media")
-        .select("id, url, alt, order")
-        .eq("articulo_id", articleId)
-        .order("order", { ascending: true }),
-    ]);
+  const { data: articulo, error: artError } = await supabase
+    .from("articulos_categoria")
+    .select(
+      "id, title, slug, description, price, cover_image, published, category_id"
+    )
+    .eq("id", articleId)
+    .maybeSingle();
 
+  if (artError) {
+    console.error("Error cargando artículo:", artError.message);
+  }
   if (!articulo) notFound();
 
-  const boundUpdate = updateArticle.bind(null, articulo.id);
-  const boundUpload = uploadMedia.bind(null, articulo.id);
-  const photos = media ?? [];
+  const { data: productos } = await supabase
+    .from("productos")
+    .select("id, name")
+    .order("name");
+
+  // "order" es palabra reservada → la pedimos entre comillas y ordenamos en JS
+  const { data: mediaRaw, error: mediaError } = await supabase
+    .from("articulos_media")
+    .select('id, url, alt, "order"')
+    .eq("articulo_id", articleId);
+
+  if (mediaError) {
+    console.error("Error cargando media:", mediaError.message);
+  }
+
+  type MediaRow = {
+    id: number;
+    url: string;
+    alt: string | null;
+    order?: number;
+  };
+
+  const photos: MediaRow[] = ((mediaRaw as MediaRow[] | null) ?? [])
+    .slice()
+    .sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
+
+  const boundUpdate = updateArticle.bind(null, Number(articulo.id));
+  const boundUpload = uploadMedia.bind(null, Number(articulo.id));
 
   return (
     <div className="space-y-12">
@@ -167,7 +177,7 @@ export default async function EditarArticuloPage({
               id="published"
               name="published"
               type="checkbox"
-              defaultChecked={articulo.published}
+              defaultChecked={!!articulo.published}
               className="w-4 h-4 accent-accent"
             />
             <label
@@ -191,13 +201,15 @@ export default async function EditarArticuloPage({
             >
               Cancelar
             </Link>
-            <Link
-              href={`/catalogo/${articulo.slug}`}
-              target="_blank"
-              className="font-heading text-sm text-muted hover:text-accent ml-auto"
-            >
-              Ver en el sitio →
-            </Link>
+            {articulo.slug && (
+              <Link
+                href={`/catalogo/${articulo.slug}`}
+                target="_blank"
+                className="font-heading text-sm text-muted hover:text-accent ml-auto"
+              >
+                Ver en el sitio →
+              </Link>
+            )}
           </div>
         </form>
       </div>
@@ -212,6 +224,12 @@ export default async function EditarArticuloPage({
           tarjetas del catálogo.
         </p>
 
+        {mediaError && (
+          <p className="text-red-400 text-sm mb-4">
+            No se pudieron cargar las fotos existentes: {mediaError.message}
+          </p>
+        )}
+
         {photos.length > 0 && (
           <div className="grid grid-cols-2 sm:grid-cols-3 md:grid-cols-4 gap-4 mb-8">
             {photos.map((photo) => {
@@ -220,7 +238,9 @@ export default async function EditarArticuloPage({
                 <div
                   key={photo.id}
                   className={`relative group rounded-sm border overflow-hidden ${
-                    isCover ? "border-accent ring-1 ring-accent/40" : "border-border"
+                    isCover
+                      ? "border-accent ring-1 ring-accent/40"
+                      : "border-border"
                   }`}
                 >
                   {/* eslint-disable-next-line @next/next/no-img-element */}
@@ -236,7 +256,13 @@ export default async function EditarArticuloPage({
                   )}
                   <div className="absolute inset-x-0 bottom-0 bg-bg/90 p-1.5 flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                     {!isCover && (
-                      <form action={setCoverFromMedia.bind(null, photo.id, articulo.id)}>
+                      <form
+                        action={setCoverFromMedia.bind(
+                          null,
+                          Number(photo.id),
+                          Number(articulo.id)
+                        )}
+                      >
                         <button
                           type="submit"
                           className="text-[10px] font-heading text-paper hover:text-accent px-1"
@@ -245,7 +271,13 @@ export default async function EditarArticuloPage({
                         </button>
                       </form>
                     )}
-                    <form action={deleteMedia.bind(null, photo.id, articulo.id)}>
+                    <form
+                      action={deleteMedia.bind(
+                        null,
+                        Number(photo.id),
+                        Number(articulo.id)
+                      )}
+                    >
                       <button
                         type="submit"
                         className="text-[10px] font-heading text-red-400/80 hover:text-red-400 px-1"
@@ -260,7 +292,11 @@ export default async function EditarArticuloPage({
           </div>
         )}
 
-        <form action={boundUpload} className="space-y-4" encType="multipart/form-data">
+        <form
+          action={boundUpload}
+          className="space-y-4"
+          encType="multipart/form-data"
+        >
           <div>
             <label
               htmlFor="files"
@@ -278,7 +314,8 @@ export default async function EditarArticuloPage({
               className="w-full text-sm text-muted file:mr-4 file:py-2 file:px-4 file:rounded-sm file:border-0 file:bg-surface file:text-paper file:font-heading file:text-sm hover:file:bg-border"
             />
             <p className="text-muted text-xs mt-1">
-              Podés seleccionar varias a la vez. JPG, PNG, WebP, GIF o AVIF. Máx. 8 MB c/u.
+              Podés seleccionar varias a la vez. JPG, PNG, WebP, GIF o AVIF.
+              Máx. 8 MB c/u.
             </p>
           </div>
           <button

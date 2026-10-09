@@ -22,7 +22,7 @@ async function getArticuloBySlug(slug: string) {
       published,
       category_id,
       productos ( id, name, slug ),
-      articulos_media ( id, url, alt, order )
+      articulos_media ( id, url, alt, "order" )
     `
     )
     .eq("slug", slug)
