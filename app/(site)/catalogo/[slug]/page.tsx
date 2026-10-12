@@ -12,8 +12,8 @@ interface Props {
 async function getArticuloBySlug(slug: string) {
   const supabase = await createClient();
 
-  // Traemos todo de una sola vez (las columnas ya existen en la tabla)
-  const { data, error } = await supabase
+  // 1) Query base (columnas que SIEMPRE existen) — garantiza que la página no caiga en 404
+  const { data: base, error: baseError } = await supabase
     .from("articulos_categoria")
     .select(
       `
@@ -25,10 +25,6 @@ async function getArticuloBySlug(slug: string) {
       cover_image,
       published,
       category_id,
-      mercadolibre_url,
-      facebook_marketplace_url,
-      original_price,
-      discount_note,
       productos ( id, name, slug ),
       articulos_media ( id, url, alt, "order" )
     `
@@ -37,14 +33,65 @@ async function getArticuloBySlug(slug: string) {
     .eq("published", true)
     .maybeSingle();
 
-  if (error || !data) return null;
+  if (baseError || !base) return null;
+
+  // 2) Intentamos traer las columnas nuevas (si aún no existen, no rompemos nada)
+  let mercadolibre_url: string | null = null;
+  let facebook_marketplace_url: string | null = null;
+  let original_price: string | number | null = null;
+  let discount_note: string | null = null;
+
+  try {
+    const { data: extra, error: extraError } = await supabase
+      .from("articulos_categoria")
+      .select(
+        "mercadolibre_url, facebook_marketplace_url, original_price, discount_note"
+      )
+      .eq("id", base.id)
+      .maybeSingle();
+
+    // Si PostgREST se queja de columnas inexistentes, extraError tendrá mensaje
+    if (!extraError && extra) {
+      // @ts-expect-error -- columnas opcionales
+      mercadolibre_url = extra.mercadolibre_url ?? null;
+      // @ts-expect-error -- columnas opcionales
+      facebook_marketplace_url = extra.facebook_marketplace_url ?? null;
+      // @ts-expect-error -- columnas opcionales
+      original_price = extra.original_price ?? null;
+      // @ts-expect-error -- columnas opcionales
+      discount_note = extra.discount_note ?? null;
+    }
+  } catch {
+    // Las columnas todavía no existen → seguimos con nulls
+  }
+
+  // Fallback: si el select con original_price/discount_note falló,
+  // intentamos solo las dos URLs que sí existen en la tabla
+  if (!mercadolibre_url && !facebook_marketplace_url) {
+    try {
+      const { data: urls, error: urlsError } = await supabase
+        .from("articulos_categoria")
+        .select("mercadolibre_url, facebook_marketplace_url")
+        .eq("id", base.id)
+        .maybeSingle();
+
+      if (!urlsError && urls) {
+        // @ts-expect-error -- columnas opcionales
+        mercadolibre_url = urls.mercadolibre_url ?? null;
+        // @ts-expect-error -- columnas opcionales
+        facebook_marketplace_url = urls.facebook_marketplace_url ?? null;
+      }
+    } catch {
+      // ignore
+    }
+  }
 
   return {
-    ...data,
-    mercadolibre_url: data.mercadolibre_url ?? null,
-    facebook_marketplace_url: data.facebook_marketplace_url ?? null,
-    original_price: data.original_price ?? null,
-    discount_note: data.discount_note ?? null,
+    ...base,
+    mercadolibre_url,
+    facebook_marketplace_url,
+    original_price,
+    discount_note,
   };
 }
 
