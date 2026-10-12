@@ -3,6 +3,7 @@ import Link from "next/link";
 import { notFound } from "next/navigation";
 import { createClient } from "@/lib/supabase/server";
 import ProductGallery from "@/components/catalogo/ProductGallery";
+import ProductOfferCard from "@/components/catalogo/ProductOfferCard";
 
 interface Props {
   params: Promise<{ slug: string }>;
@@ -22,6 +23,10 @@ async function getArticuloBySlug(slug: string) {
       cover_image,
       published,
       category_id,
+      mercadolibre_url,
+      facebook_marketplace_url,
+      original_price,
+      discount_note,
       productos ( id, name, slug ),
       articulos_media ( id, url, alt, "order" )
     `
@@ -83,6 +88,16 @@ export default async function ArticuloDetailPage({ params }: Props) {
   );
   const waUrl = `https://wa.me/${waNumber}?text=${waMessage}`;
 
+  // Campos nuevos (pueden ser null si todavía no los agregaste en Supabase)
+  // @ts-expect-error -- columnas nuevas opcionales
+  const mercadolibreUrl = (art.mercadolibre_url as string | null) ?? null;
+  // @ts-expect-error -- columnas nuevas opcionales
+  const facebookUrl = (art.facebook_marketplace_url as string | null) ?? null;
+  // @ts-expect-error -- columnas nuevas opcionales
+  const originalPrice = (art.original_price as string | number | null) ?? null;
+  // @ts-expect-error -- columnas nuevas opcionales
+  const discountNote = (art.discount_note as string | null) ?? null;
+
   return (
     <div className="pt-32 pb-24 max-w-7xl mx-auto px-4 sm:px-6">
       <nav className="flex flex-wrap items-center gap-2 text-xs font-heading text-muted mb-8">
@@ -105,8 +120,20 @@ export default async function ArticuloDetailPage({ params }: Props) {
       </nav>
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_1fr] gap-8 lg:gap-12">
-        {/* Galería interactiva — columna más ancha */}
-        <ProductGallery photos={gallery} title={art.title} />
+        {/* Columna izquierda: Galería + Cartelito de oferta/pagos/redes */}
+        <div className="flex flex-col">
+          <ProductGallery photos={gallery} title={art.title} />
+
+          {/* Cartelito debajo de las fotos */}
+          <ProductOfferCard
+            price={art.price}
+            originalPrice={originalPrice}
+            title={art.title}
+            mercadolibreUrl={mercadolibreUrl}
+            facebookUrl={facebookUrl}
+            discountNote={discountNote}
+          />
+        </div>
 
         {/* Info */}
         <div className="flex flex-col">
