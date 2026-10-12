@@ -68,11 +68,10 @@ export default function ProductOfferCard({
 
   return (
     /*
-      mr recorta solo el lado derecho para alinear con el borde
-      derecho de la foto principal (sin la flecha de navegación):
-      flecha w-10/w-11 + gap-2/gap-3 ≈ 3rem / 3.5rem
+      max-w alinea el borde derecho de la tarjeta con el de la foto
+      (la foto está limitada por aspect-[4/5] max-h-[40rem] ≈ 32rem de ancho máx.)
     */
-    <div className="mt-5 w-full max-w-full mr-[3rem] sm:mr-[3.5rem] rounded-xl overflow-hidden border border-border bg-surface box-border">
+    <div className="mt-5 w-full max-w-[min(100%,28rem)] rounded-xl overflow-hidden border border-border bg-surface box-border">
       {/* ===== BLOQUE PRECIO PRINCIPAL (transferencia / 1 pago) ===== */}
       <button
         type="button"

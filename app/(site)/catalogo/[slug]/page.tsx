@@ -166,7 +166,7 @@ export default async function ArticuloDetailPage({ params }: Props) {
         <span className="text-paper/70 line-clamp-1">{art.title}</span>
       </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_1fr] gap-8 lg:gap-12">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_1fr] gap-8 lg:gap-12">
         {/* Columna izquierda: Galería + Cartelito */}
         <div className="flex flex-col w-full min-w-0">
           <ProductGallery photos={gallery} title={art.title} />
