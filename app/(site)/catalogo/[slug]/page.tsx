@@ -1,41 +1,11 @@
 import type { Metadata } from "next";
 import Link from "next/link";
+import Image from "next/image";
 import { notFound } from "next/navigation";
-import { createClient } from "@/lib/supabase/server";
-import ProductGallery from "@/components/catalogo/ProductGallery";
-import ProductOfferCard from "@/components/catalogo/ProductOfferCard";
+import { getArticuloBySlug } from "@/lib/queries";
 
 interface Props {
   params: Promise<{ slug: string }>;
-}
-
-async function getArticuloBySlug(slug: string) {
-  const supabase = await createClient();
-  const { data } = await supabase
-    .from("articulos_categoria")
-    .select(
-      `
-      id,
-      title,
-      slug,
-      description,
-      price,
-      cover_image,
-      published,
-      category_id,
-      mercadolibre_url,
-      facebook_marketplace_url,
-      original_price,
-      discount_note,
-      productos ( id, name, slug ),
-      articulos_media ( id, url, alt, "order" )
-    `
-    )
-    .eq("slug", slug)
-    .eq("published", true)
-    .maybeSingle();
-
-  return data;
 }
 
 export async function generateMetadata({ params }: Props): Promise<Metadata> {
@@ -47,145 +17,65 @@ export async function generateMetadata({ params }: Props): Promise<Metadata> {
     title: art.title,
     description: art.description ?? undefined,
     alternates: { canonical: `/catalogo/${slug}` },
-    openGraph: art.cover_image
-      ? { images: [{ url: art.cover_image }] }
-      : undefined,
   };
 }
 
-export default async function ArticuloDetailPage({ params }: Props) {
+export default async function CatalogoArticuloPage({ params }: Props) {
   const { slug } = await params;
   const art = await getArticuloBySlug(slug);
   if (!art) notFound();
 
-  // @ts-expect-error -- relación anidada
-  const categoria = art.productos as {
-    id: string;
-    name: string;
-    slug: string;
-  } | null;
-
-  // @ts-expect-error -- relación anidada
-  const mediaRaw = (art.articulos_media ?? []) as {
-    id: number;
-    url: string;
-    alt: string | null;
-    order?: number;
-  }[];
-
-  const photos = [...mediaRaw].sort((a, b) => (a.order ?? 0) - (b.order ?? 0));
-
-  const gallery =
-    photos.length > 0
-      ? photos.map((p) => ({ id: p.id, url: p.url, alt: p.alt }))
-      : art.cover_image
-        ? [{ id: 0, url: art.cover_image, alt: art.title }]
-        : [];
-
-  const waNumber = "541166924507";
-  const waMessage = encodeURIComponent(
-    `Hola! Me interesa el producto: ${art.title}${art.price ? ` ($${art.price})` : ""}`
-  );
-  const waUrl = `https://wa.me/${waNumber}?text=${waMessage}`;
-
-  // Campos nuevos (pueden ser null si todavía no los agregaste en Supabase)
-  // @ts-expect-error -- columnas nuevas opcionales
-  const mercadolibreUrl = (art.mercadolibre_url as string | null) ?? null;
-  // @ts-expect-error -- columnas nuevas opcionales
-  const facebookUrl = (art.facebook_marketplace_url as string | null) ?? null;
-  // @ts-expect-error -- columnas nuevas opcionales
-  const originalPrice = (art.original_price as string | number | null) ?? null;
-  // @ts-expect-error -- columnas nuevas opcionales
-  const discountNote = (art.discount_note as string | null) ?? null;
+  // @ts-expect-error relación anidada
+  const categoryName = (art.category?.name as string | undefined) ?? "Productos";
+  // @ts-expect-error relación anidada
+  const categorySlug = art.category?.slug as string | undefined;
 
   return (
-    <div className="pt-32 pb-24 max-w-7xl mx-auto px-4 sm:px-6">
-      <nav className="flex flex-wrap items-center gap-2 text-xs font-heading text-muted mb-8">
-        <Link href="/productos" className="hover:text-accent transition-colors">
-          Productos
-        </Link>
-        {categoria && (
-          <>
-            <span>/</span>
-            <Link
-              href={`/productos/${categoria.slug}`}
-              className="hover:text-accent transition-colors"
-            >
-              {categoria.name}
-            </Link>
-          </>
-        )}
-        <span>/</span>
-        <span className="text-paper/70 line-clamp-1">{art.title}</span>
-      </nav>
+    <div className="pt-32 pb-24 max-w-6xl mx-auto px-6">
+      <Link
+        href={categorySlug ? `/productos/${categorySlug}` : "/productos"}
+        className="font-heading text-xs text-muted hover:text-accent transition-colors"
+      >
+        ← {categoryName.toUpperCase()}
+      </Link>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_1fr] gap-8 lg:gap-12">
-        {/* Columna izquierda: Galería + Cartelito de oferta/pagos/redes */}
-        <div className="flex flex-col">
-          <ProductGallery photos={gallery} title={art.title} />
-
-          {/* Cartelito debajo de las fotos */}
-          <ProductOfferCard
-            price={art.price}
-            originalPrice={originalPrice}
-            title={art.title}
-            mercadolibreUrl={mercadolibreUrl}
-            facebookUrl={facebookUrl}
-            discountNote={discountNote}
-          />
-        </div>
-
-        {/* Info */}
-        <div className="flex flex-col">
-          {categoria && (
-            <Link
-              href={`/productos/${categoria.slug}`}
-              className="font-heading text-accent text-xs font-semibold mb-2 hover:underline w-fit"
-            >
-              {categoria.name}
-            </Link>
-          )}
-
-          <h1 className="font-heading font-bold text-paper text-3xl md:text-4xl leading-tight">
-            {art.title}
-          </h1>
-
-          <p className="text-accent font-heading font-bold text-2xl md:text-3xl mt-4">
-            {art.price ? `$ ${art.price}` : "Consultar precio"}
-          </p>
-
-          {art.description && (
-            <div className="mt-6">
-              <h2 className="font-heading text-sm text-muted mb-2">Descripción</h2>
-              <p className="text-paper/90 text-sm leading-relaxed whitespace-pre-line">
-                {art.description}
-              </p>
+      <div className="mt-6 grid grid-cols-1 md:grid-cols-2 gap-10 items-start">
+        <div className="relative aspect-square w-full rounded-xl overflow-hidden bg-surface border border-border">
+          {art.cover_image ? (
+            <Image
+              src={art.cover_image}
+              alt={art.title}
+              fill
+              sizes="(max-width: 768px) 100vw, 50vw"
+              className="object-cover"
+              priority
+            />
+          ) : (
+            <div className="absolute inset-0 flex items-center justify-center">
+              <span className="font-heading text-muted text-sm">Sin imagen</span>
             </div>
           )}
+        </div>
 
-          <div className="mt-8 flex flex-col sm:flex-row gap-3">
-            <a
-              href={waUrl}
-              target="_blank"
-              rel="noopener noreferrer"
-              className="inline-flex items-center justify-center gap-2 font-heading font-semibold bg-accent text-bg px-6 py-3 rounded-sm hover:opacity-90 transition-opacity"
-            >
-              Consultar por WhatsApp
-            </a>
-            {categoria && (
-              <Link
-                href={`/productos/${categoria.slug}`}
-                className="inline-flex items-center justify-center font-heading text-sm border border-border text-paper px-6 py-3 rounded-sm hover:border-accent hover:text-accent transition-colors"
-              >
-                Ver más de {categoria.name}
-              </Link>
-            )}
-          </div>
-
-          <p className="text-muted text-xs mt-6">
-            Ubicado en Quilmes / Almirante Brown. Consultá disponibilidad y formas de
-            entrega.
+        <div>
+          <p className="font-heading text-accent text-sm mb-2">{categoryName}</p>
+          <h1 className="font-heading font-bold text-paper text-3xl md:text-4xl">
+            {art.title}
+          </h1>
+          <p className="font-heading font-bold text-accent text-2xl mt-4">
+            {art.price && String(art.price).trim() ? art.price : "Consultar precio"}
           </p>
+          {art.description && (
+            <p className="text-muted mt-6 leading-relaxed whitespace-pre-line">
+              {art.description}
+            </p>
+          )}
+          <Link
+            href="/contacto"
+            className="mt-8 inline-flex font-heading text-sm font-semibold tracking-wide text-bg bg-accent px-6 py-3 rounded-sm hover:opacity-90 transition-opacity"
+          >
+            Consultar disponibilidad
+          </Link>
         </div>
       </div>
     </div>

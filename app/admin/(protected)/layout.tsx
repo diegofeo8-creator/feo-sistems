@@ -25,13 +25,13 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
               href="/admin/articulos"
               className="font-heading text-sm text-paper/80 hover:text-accent"
             >
-              Catálogo
+              Artículos
             </Link>
             <Link
-              href="/admin/casos/nuevo"
+              href="/admin/articulos/nuevo"
               className="font-heading text-sm font-semibold bg-accent text-bg px-3 py-1.5 rounded-sm hover:opacity-90"
             >
-              + Nuevo caso
+              + Nuevo artículo
             </Link>
             <Link
               href="/"
@@ -43,7 +43,9 @@ export default function AdminLayout({ children }: { children: React.ReactNode })
           </nav>
         </div>
       </header>
-      <main id="admin-main" className="max-w-5xl mx-auto px-6 py-10">{children}</main>
+      <main id="admin-main" className="max-w-5xl mx-auto px-6 py-10">
+        {children}
+      </main>
     </div>
   );
 }

@@ -1,39 +1,15 @@
 import Link from "next/link";
-import { createClient } from "@/lib/supabase/server";
-import { deleteArticle, togglePublish } from "./actions";
+import { getAllArticulosForAdmin } from "@/lib/queries";
+import { deleteArticulo, togglePublishArticulo } from "./actions";
 import ConfirmSubmitButton from "@/components/admin/ConfirmSubmitButton";
 
-export const dynamic = "force-dynamic";
-
-export default async function ArticulosPage({
+export default async function AdminArticulosPage({
   searchParams,
 }: {
   searchParams: Promise<{ success?: string; error?: string }>;
 }) {
   const { success, error } = await searchParams;
-  const supabase = await createClient();
-
-  const { data: articulos, error: fetchError } = await supabase
-    .from("articulos_categoria")
-    .select(
-      `
-      id,
-      title,
-      slug,
-      price,
-      published,
-      cover_image,
-      category_id,
-      productos ( id, name )
-    `
-    )
-    .order("created_at", { ascending: false });
-
-  if (fetchError) {
-    console.error("Error al cargar artículos:", fetchError.message);
-  }
-
-  const list = articulos ?? [];
+  const articulos = await getAllArticulosForAdmin();
 
   return (
     <div>
@@ -48,20 +24,20 @@ export default async function ArticulosPage({
         </p>
       )}
 
-      <div className="flex items-center justify-between mb-8 gap-4 flex-wrap">
-        <h1 className="font-heading font-bold text-2xl">
-          Catálogo ({list.length})
-        </h1>
+      <div className="flex items-center justify-between mb-8">
+        <h1 className="font-heading font-bold text-2xl">Artículos del catálogo</h1>
         <Link
           href="/admin/articulos/nuevo"
-          className="font-heading text-sm font-semibold bg-accent text-bg px-4 py-2 rounded-sm hover:opacity-90 transition-opacity"
+          className="font-heading text-sm font-semibold bg-accent text-bg px-3 py-1.5 rounded-sm hover:opacity-90"
         >
           + Nuevo artículo
         </Link>
       </div>
 
-      {list.length === 0 ? (
-        <p className="text-muted">Todavía no creaste ningún artículo del catálogo.</p>
+      {articulos.length === 0 ? (
+        <p className="text-muted text-sm border border-border rounded-sm px-6 py-10 text-center">
+          Todavía no hay artículos. Creá el primero.
+        </p>
       ) : (
         <div className="border border-border rounded-sm overflow-hidden">
           <table className="w-full text-sm">
@@ -75,30 +51,15 @@ export default async function ArticulosPage({
               </tr>
             </thead>
             <tbody>
-              {list.map((a) => (
+              {articulos.map((a) => (
                 <tr key={a.id} className="border-t border-border">
                   <td className="px-4 py-3">
-                    <div className="flex items-center gap-3">
-                      {a.cover_image ? (
-                        // eslint-disable-next-line @next/next/no-img-element
-                        <img
-                          src={a.cover_image}
-                          alt=""
-                          className="w-10 h-10 object-cover rounded-sm border border-border"
-                        />
-                      ) : (
-                        <div className="w-10 h-10 rounded-sm border border-border bg-surface flex items-center justify-center text-muted text-xs">
-                          —
-                        </div>
-                      )}
-                      <span>{a.title}</span>
-                    </div>
+                    <div className="font-medium">{a.title}</div>
+                    <div className="text-muted text-xs mt-0.5">/catalogo/{a.slug}</div>
                   </td>
-                  <td className="px-4 py-3 text-muted">
-                    {/* @ts-expect-error -- relación anidada en tiempo de ejecución */}
-                    {a.productos?.name ?? "—"}
-                  </td>
-                  <td className="px-4 py-3 text-muted">{a.price ?? "—"}</td>
+                  {/* @ts-expect-error relación anidada */}
+                  <td className="px-4 py-3 text-muted">{a.category?.name ?? "—"}</td>
+                  <td className="px-4 py-3 text-muted">{a.price || "—"}</td>
                   <td className="px-4 py-3">
                     <span
                       className={
@@ -112,23 +73,27 @@ export default async function ArticulosPage({
                   </td>
                   <td className="px-4 py-3">
                     <div className="flex items-center justify-end gap-3">
+                      {a.published && (
+                        <Link
+                          href={`/catalogo/${a.slug}`}
+                          target="_blank"
+                          className="text-paper/80 hover:text-accent"
+                        >
+                          Ver
+                        </Link>
+                      )}
                       <Link
                         href={`/admin/articulos/${a.id}/editar`}
                         className="text-paper/80 hover:text-accent"
                       >
                         Editar
                       </Link>
-
-                      <form action={togglePublish.bind(null, a.id, a.published)}>
-                        <button
-                          type="submit"
-                          className="text-paper/80 hover:text-accent"
-                        >
+                      <form action={togglePublishArticulo.bind(null, String(a.id), a.published)}>
+                        <button type="submit" className="text-paper/80 hover:text-accent">
                           {a.published ? "Despublicar" : "Publicar"}
                         </button>
                       </form>
-
-                      <form action={deleteArticle.bind(null, a.id)}>
+                      <form action={deleteArticulo.bind(null, String(a.id))}>
                         <ConfirmSubmitButton
                           confirmMessage={`¿Eliminar "${a.title}"? Esta acción no se puede deshacer.`}
                           className="text-red-400/80 hover:text-red-400"
