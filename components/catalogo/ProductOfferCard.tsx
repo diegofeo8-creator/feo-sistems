@@ -131,7 +131,7 @@ export default function ProductOfferCard({
       <button
         type="button"
         onClick={() => setMode("cuotas")}
-        className={`w-full text-left border-t border-border/60 px-4 py-3 transition-colors duration-200 ${
+        className={`w-full text-left border-t border-border px-4 py-3 transition-colors duration-200 ${
           mode === "cuotas" ? selectedBg : idleBg
         }`}
       >
@@ -193,7 +193,7 @@ export default function ProductOfferCard({
       </button>
 
       {/* ===== GARANTÍA / STOCK / ENVÍO ===== */}
-      <div className="border-t border-border/60 px-4 py-3 space-y-2.5">
+      <div className="border-t border-border px-4 py-3 space-y-2.5">
         <div className="flex items-center gap-2 text-[13px]">
           <span className="text-emerald-400 text-base leading-none">✓</span>
           <span className="text-emerald-400 font-medium">Stock disponible</span>
@@ -220,7 +220,7 @@ export default function ProductOfferCard({
 
       {/* ===== LINKS ML / FB ===== */}
       {hasSocial && (
-        <div className="border-t border-border/60 px-4 py-3">
+        <div className="border-t border-border px-4 py-3">
           <p className="text-[11px] text-muted mb-2.5 font-medium uppercase tracking-wide">
             Ver publicación original
           </p>
@@ -252,7 +252,7 @@ export default function ProductOfferCard({
       )}
 
       {!hasSocial && (
-        <div className="border-t border-border/60 px-4 py-3">
+        <div className="border-t border-border px-4 py-3">
           <p className="text-[12px] text-muted">
             Publicación disponible solo en esta web. Consultá por WhatsApp.
           </p>
