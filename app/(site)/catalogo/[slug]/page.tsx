@@ -168,7 +168,7 @@ export default async function ArticuloDetailPage({ params }: Props) {
 
       <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_1fr] gap-8 lg:gap-12">
         {/* Columna izquierda: Galería + Cartelito */}
-        <div className="flex flex-col">
+        <div className="flex flex-col w-full min-w-0">
           <ProductGallery photos={gallery} title={art.title} />
 
           <ProductOfferCard
@@ -182,7 +182,7 @@ export default async function ArticuloDetailPage({ params }: Props) {
         </div>
 
         {/* Info */}
-        <div className="flex flex-col">
+        <div className="flex flex-col w-full min-w-0">
           {categoria && (
             <Link
               href={`/productos/${categoria.slug}`}

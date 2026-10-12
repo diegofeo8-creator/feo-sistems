@@ -67,7 +67,7 @@ export default function ProductOfferCard({
   const idleBg = "bg-transparent hover:bg-white/[0.03]";
 
   return (
-    <div className="mt-5 w-full rounded-xl overflow-hidden border border-border bg-surface">
+    <div className="mt-5 w-full max-w-full rounded-xl overflow-hidden border border-border bg-surface box-border">
       {/* ===== BLOQUE PRECIO PRINCIPAL (transferencia / 1 pago) ===== */}
       <button
         type="button"
@@ -119,10 +119,12 @@ export default function ProductOfferCard({
           </p>
         </div>
 
-        {/* Nota de descuento */}
-        <p className="text-[12px] text-muted mt-2 leading-snug">
-          {discountNote?.trim() || defaultDiscount}
-        </p>
+        {/* Nota de descuento — SOLO si está seleccionado 1 pago */}
+        {mode === "transfer" && (
+          <p className="text-[12px] text-muted mt-2 leading-snug animate-in fade-in duration-200">
+            {discountNote?.trim() || defaultDiscount}
+          </p>
+        )}
       </button>
 
       {/* ===== OTROS MEDIOS DE PAGO / CUOTAS ===== */}
@@ -159,7 +161,7 @@ export default function ProductOfferCard({
               Otros medios de pago
             </p>
 
-            {/* Precio en cuotas — más grande */}
+            {/* Precio en cuotas — siempre visible en este bloque */}
             {otherPrice && (
               <p className="font-heading font-bold text-[22px] md:text-[26px] text-paper leading-none tracking-tight">
                 $ {otherPrice}{" "}
@@ -169,19 +171,23 @@ export default function ProductOfferCard({
               </p>
             )}
 
-            <p className="text-[12px] text-muted mt-2 leading-snug">
-              Abonando con billeteras virtuales o tarjeta de crédito.
-            </p>
+            {/* Info extra — SOLO si está seleccionado cuotas */}
+            {mode === "cuotas" && (
+              <div className="mt-2 space-y-1.5 animate-in fade-in duration-200">
+                <p className="text-[12px] text-muted leading-snug">
+                  Abonando con billeteras virtuales o tarjeta de crédito.
+                </p>
 
-            {/* MODO */}
-            <p className="text-[13px] text-paper mt-2.5 flex flex-wrap items-center gap-1.5">
-              <span>Cuotas sin interés abonando desde</span>
-              <ModoLogo />
-            </p>
+                <p className="text-[13px] text-paper flex flex-wrap items-center gap-1.5">
+                  <span>Cuotas sin interés abonando desde</span>
+                  <ModoLogo />
+                </p>
 
-            <p className="text-[12px] text-red-400 mt-1.5 font-medium">
-              Ver promociones
-            </p>
+                <p className="text-[12px] text-red-400 font-medium">
+                  Ver promociones
+                </p>
+              </div>
+            )}
           </div>
         </div>
       </button>
