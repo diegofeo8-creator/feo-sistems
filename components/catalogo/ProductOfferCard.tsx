@@ -62,13 +62,13 @@ export default function ProductOfferCard({
   const defaultDiscount =
     "Incluye 10% de descuento por pago con depósito o transferencia.";
 
-  // Fondo más claro cuando el bloque está seleccionado
-  const selectedBg = "bg-paper/10";
-  const idleBg = "bg-transparent";
+  // Gris más claro y visible al seleccionar
+  const selectedBg = "bg-white/[0.08]";
+  const idleBg = "bg-transparent hover:bg-white/[0.03]";
 
   return (
     <div className="mt-5 w-full rounded-xl overflow-hidden border border-border bg-surface">
-      {/* ===== BLOQUE PRECIO PRINCIPAL (transferencia) ===== */}
+      {/* ===== BLOQUE PRECIO PRINCIPAL (transferencia / 1 pago) ===== */}
       <button
         type="button"
         onClick={() => setMode("transfer")}
@@ -159,7 +159,7 @@ export default function ProductOfferCard({
               Otros medios de pago
             </p>
 
-            {/* Precio en cuotas — MÁS GRANDE */}
+            {/* Precio en cuotas — más grande */}
             {otherPrice && (
               <p className="font-heading font-bold text-[22px] md:text-[26px] text-paper leading-none tracking-tight">
                 $ {otherPrice}{" "}
