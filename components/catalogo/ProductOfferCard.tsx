@@ -67,7 +67,12 @@ export default function ProductOfferCard({
   const idleBg = "bg-transparent hover:bg-white/[0.03]";
 
   return (
-    <div className="mt-5 w-full max-w-full rounded-xl overflow-hidden border border-border bg-surface box-border">
+    /*
+      mr recorta solo el lado derecho para alinear con el borde
+      derecho de la foto principal (sin la flecha de navegación):
+      flecha w-10/w-11 + gap-2/gap-3 ≈ 3rem / 3.5rem
+    */
+    <div className="mt-5 w-full max-w-full mr-[3rem] sm:mr-[3.5rem] rounded-xl overflow-hidden border border-border bg-surface box-border">
       {/* ===== BLOQUE PRECIO PRINCIPAL (transferencia / 1 pago) ===== */}
       <button
         type="button"
@@ -119,12 +124,18 @@ export default function ProductOfferCard({
           </p>
         </div>
 
-        {/* Nota de descuento — SOLO si está seleccionado 1 pago */}
-        {mode === "transfer" && (
-          <p className="text-[12px] text-muted mt-2 leading-snug animate-in fade-in duration-200">
+        {/* Nota de descuento — animada */}
+        <div
+          className={`overflow-hidden transition-all duration-300 ease-out ${
+            mode === "transfer"
+              ? "max-h-16 opacity-100 mt-2"
+              : "max-h-0 opacity-0 mt-0"
+          }`}
+        >
+          <p className="text-[12px] text-muted leading-snug">
             {discountNote?.trim() || defaultDiscount}
           </p>
-        )}
+        </div>
       </button>
 
       {/* ===== OTROS MEDIOS DE PAGO / CUOTAS ===== */}
@@ -171,9 +182,15 @@ export default function ProductOfferCard({
               </p>
             )}
 
-            {/* Info extra — SOLO si está seleccionado cuotas */}
-            {mode === "cuotas" && (
-              <div className="mt-2 space-y-1.5 animate-in fade-in duration-200">
+            {/* Info extra cuotas — animada */}
+            <div
+              className={`overflow-hidden transition-all duration-300 ease-out ${
+                mode === "cuotas"
+                  ? "max-h-28 opacity-100 mt-2"
+                  : "max-h-0 opacity-0 mt-0"
+              }`}
+            >
+              <div className="space-y-1.5">
                 <p className="text-[12px] text-muted leading-snug">
                   Abonando con billeteras virtuales o tarjeta de crédito.
                 </p>
@@ -187,7 +204,7 @@ export default function ProductOfferCard({
                   Ver promociones
                 </p>
               </div>
-            )}
+            </div>
           </div>
         </div>
       </button>
