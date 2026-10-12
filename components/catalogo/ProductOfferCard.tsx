@@ -12,12 +12,17 @@ interface Props {
   discountNote?: string | null;
 }
 
-function formatPrice(value: string | number | null | undefined): string | null {
+function parseNumber(value: string | number | null | undefined): number | null {
   if (value === null || value === undefined || value === "") return null;
   const str = String(value).replace(/[^\d]/g, "");
   if (!str) return null;
   const num = Number(str);
-  if (Number.isNaN(num)) return String(value);
+  return Number.isNaN(num) ? null : num;
+}
+
+function formatPrice(value: string | number | null | undefined): string | null {
+  const num = parseNumber(value);
+  if (num === null) return null;
   return num.toLocaleString("es-AR");
 }
 
@@ -29,12 +34,28 @@ export default function ProductOfferCard({
   facebookUrl,
   discountNote,
 }: Props) {
-  const [openPayments, setOpenPayments] = useState(false);
+  const [openPayments, setOpenPayments] = useState(true);
 
   const displayPrice = formatPrice(price);
   const displayOriginal = formatPrice(originalPrice);
+  const priceNum = parseNumber(price);
+  const originalNum = parseNumber(originalPrice);
+
   const hasDiscount =
-    Boolean(displayOriginal && displayPrice && displayOriginal !== displayPrice);
+    originalNum !== null &&
+    priceNum !== null &&
+    originalNum > priceNum;
+
+  const savings =
+    hasDiscount && originalNum !== null && priceNum !== null
+      ? (originalNum - priceNum).toLocaleString("es-AR")
+      : null;
+
+  // Precio sin el 10% de descuento (aprox. para "otros medios")
+  const otherPrice =
+    priceNum !== null
+      ? Math.round(priceNum / 0.9).toLocaleString("es-AR")
+      : null;
 
   const hasSocial = Boolean(mercadolibreUrl || facebookUrl);
 
@@ -42,89 +63,140 @@ export default function ProductOfferCard({
     "Incluye 10% de descuento por pago con depósito o transferencia.";
 
   return (
-    <div className="mt-5 rounded-xl border border-border bg-surface overflow-hidden shadow-sm">
-      {/* Bloque precio – estilo similar al de MercadoLibre */}
-      <div className="px-4 pt-4 pb-3">
+    <div className="mt-5 rounded-xl overflow-hidden border border-[#e0e0e0] bg-[#f5f5f5] text-[#333] shadow-sm">
+      {/* ===== BLOQUE PRECIO PRINCIPAL ===== */}
+      <div className="px-4 pt-4 pb-3 bg-[#f5f5f5]">
+        {/* Mejor precio + tachado + ahorro */}
         {hasDiscount && (
-          <div className="flex items-baseline gap-2 mb-1">
-            <span className="text-muted text-sm line-through">
+          <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 mb-1">
+            <span className="text-[11px] text-[#666] font-medium">
+              Mejor precio
+            </span>
+            <span className="text-[13px] text-[#999] line-through">
               $ {displayOriginal}
             </span>
+            {savings && (
+              <span className="text-[13px] text-[#00a650] font-medium">
+                $ {savings}
+              </span>
+            )}
           </div>
         )}
 
-        <p className="font-heading font-bold text-accent text-2xl md:text-3xl leading-none tracking-tight">
-          {displayPrice ? `$ ${displayPrice}` : "Consultar precio"}
-        </p>
+        {/* Precio grande verde + chevron */}
+        <div className="flex items-center gap-1.5">
+          <button
+            type="button"
+            onClick={() => setOpenPayments((v) => !v)}
+            className="text-[#f23d4f] shrink-0"
+            aria-label="Ver más"
+          >
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              className={`transition-transform duration-200 ${
+                openPayments ? "rotate-180" : ""
+              }`}
+            >
+              <polyline points="6 9 12 15 18 9" />
+            </svg>
+          </button>
+          <p className="font-bold text-[28px] md:text-[32px] leading-none tracking-tight text-[#00a650]">
+            {displayPrice ? `$ ${displayPrice}` : "Consultar precio"}
+          </p>
+        </div>
 
-        <p className="text-muted text-xs mt-2 leading-snug">
+        {/* Nota de descuento */}
+        <p className="text-[12px] text-[#666] mt-2 leading-snug">
           {discountNote?.trim() || defaultDiscount}
         </p>
       </div>
 
-      {/* Otros medios de pago (acordeón) */}
-      <div className="border-t border-border/60">
+      {/* ===== OTROS MEDIOS DE PAGO ===== */}
+      <div className="border-t border-[#e0e0e0] bg-[#f0f0f0]">
         <button
           type="button"
           onClick={() => setOpenPayments((v) => !v)}
-          className="w-full flex items-center justify-between gap-2 px-4 py-3 text-left hover:bg-paper/5 transition-colors"
+          className="w-full flex items-start gap-2 px-4 py-3 text-left hover:bg-[#e8e8e8] transition-colors"
         >
-          <span className="font-heading text-sm text-paper font-medium">
-            Otros medios de pago
-          </span>
           <svg
-            width="16"
-            height="16"
+            width="14"
+            height="14"
             viewBox="0 0 24 24"
             fill="none"
             stroke="currentColor"
-            strokeWidth="2.2"
-            className={`text-muted shrink-0 transition-transform duration-200 ${
-              openPayments ? "rotate-180" : ""
+            strokeWidth="3"
+            className={`text-[#f23d4f] shrink-0 mt-1 transition-transform duration-200 ${
+              openPayments ? "rotate-90" : ""
             }`}
           >
-            <polyline points="6 9 12 15 18 9" />
+            <polyline points="9 6 15 12 9 18" />
           </svg>
+
+          <div className="flex-1 min-w-0">
+            <p className="text-[13px] text-[#666] font-medium mb-0.5">
+              Otros medios de pago
+            </p>
+            {otherPrice && (
+              <p className="text-[15px] font-semibold text-[#333] leading-tight">
+                $ {otherPrice}{" "}
+                <span className="text-[#f23d4f] font-medium text-[13px]">
+                  Ver cuotas
+                </span>
+              </p>
+            )}
+            <p className="text-[12px] text-[#666] mt-0.5">
+              Cuotas sin interés abonando desde{" "}
+              <span className="text-[#00a650] font-semibold">MODO</span>
+            </p>
+            <p className="text-[12px] text-[#f23d4f] mt-1 font-medium">
+              Ver promociones
+            </p>
+          </div>
         </button>
 
         {openPayments && (
-          <div className="px-4 pb-3 space-y-2.5 text-sm text-paper/85">
+          <div className="px-4 pb-3 pt-0 space-y-2 text-[13px] text-[#444]">
             <div className="flex items-start gap-2">
-              <span className="text-accent mt-0.5">•</span>
+              <span className="text-[#00a650] mt-0.5">•</span>
               <span>
-                <strong className="text-paper">Transferencia / Depósito</strong>
-                <span className="text-muted"> — 10% de descuento</span>
+                <strong className="text-[#333]">Transferencia / Depósito</strong>
+                <span className="text-[#666]"> — 10% de descuento</span>
               </span>
             </div>
             <div className="flex items-start gap-2">
-              <span className="text-accent mt-0.5">•</span>
+              <span className="text-[#00a650] mt-0.5">•</span>
               <span>
-                <strong className="text-paper">Efectivo</strong>
-                <span className="text-muted"> — al retirar o coordinar</span>
+                <strong className="text-[#333]">Efectivo</strong>
+                <span className="text-[#666]"> — al retirar o coordinar</span>
               </span>
             </div>
             <div className="flex items-start gap-2">
-              <span className="text-accent mt-0.5">•</span>
+              <span className="text-[#00a650] mt-0.5">•</span>
               <span>
-                <strong className="text-paper">Tarjeta / Cuotas</strong>
-                <span className="text-muted"> — consultar disponibilidad</span>
+                <strong className="text-[#333]">Tarjeta / Cuotas</strong>
+                <span className="text-[#666]"> — consultar disponibilidad</span>
               </span>
             </div>
             <div className="flex items-start gap-2">
-              <span className="text-accent mt-0.5">•</span>
+              <span className="text-[#00a650] mt-0.5">•</span>
               <span>
-                <strong className="text-paper">MODO / Mercado Pago</strong>
-                <span className="text-muted"> — según el medio</span>
+                <strong className="text-[#333]">MODO / Mercado Pago</strong>
+                <span className="text-[#666]"> — según el medio</span>
               </span>
             </div>
           </div>
         )}
       </div>
 
-      {/* Links a publicaciones originales – siempre visibles si existen */}
+      {/* ===== LINKS ML / FB ===== */}
       {hasSocial && (
-        <div className="border-t border-border/60 px-4 py-3">
-          <p className="font-heading text-xs text-muted mb-2.5">
+        <div className="border-t border-[#e0e0e0] bg-white px-4 py-3">
+          <p className="text-[11px] text-[#888] mb-2 font-medium uppercase tracking-wide">
             Ver publicación original
           </p>
           <div className="flex flex-col sm:flex-row gap-2">
@@ -133,7 +205,7 @@ export default function ProductOfferCard({
                 href={mercadolibreUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 font-heading text-sm font-semibold bg-[#FFE600] text-[#333] px-4 py-2.5 rounded-sm hover:brightness-95 transition-all flex-1"
+                className="inline-flex items-center justify-center gap-2 text-[13px] font-semibold bg-[#FFE600] text-[#333] px-4 py-2.5 rounded hover:brightness-95 transition-all flex-1"
               >
                 <MercadoLibreIcon />
                 MercadoLibre
@@ -144,7 +216,7 @@ export default function ProductOfferCard({
                 href={facebookUrl}
                 target="_blank"
                 rel="noopener noreferrer"
-                className="inline-flex items-center justify-center gap-2 font-heading text-sm font-semibold bg-[#1877F2] text-white px-4 py-2.5 rounded-sm hover:brightness-110 transition-all flex-1"
+                className="inline-flex items-center justify-center gap-2 text-[13px] font-semibold bg-[#1877F2] text-white px-4 py-2.5 rounded hover:brightness-110 transition-all flex-1"
               >
                 <FacebookIcon />
                 Facebook Marketplace
@@ -154,10 +226,10 @@ export default function ProductOfferCard({
         </div>
       )}
 
-      {/* Sin links de redes */}
+      {/* Sin links */}
       {!hasSocial && (
-        <div className="border-t border-border/60 px-4 py-3">
-          <p className="text-muted text-xs">
+        <div className="border-t border-[#e0e0e0] bg-white px-4 py-3">
+          <p className="text-[12px] text-[#888]">
             Publicación disponible solo en esta web. Consultá por WhatsApp.
           </p>
         </div>
@@ -169,8 +241,8 @@ export default function ProductOfferCard({
 function MercadoLibreIcon() {
   return (
     <svg
-      width="18"
-      height="18"
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
       fill="currentColor"
       aria-hidden
@@ -183,8 +255,8 @@ function MercadoLibreIcon() {
 function FacebookIcon() {
   return (
     <svg
-      width="18"
-      height="18"
+      width="16"
+      height="16"
       viewBox="0 0 24 24"
       fill="currentColor"
       aria-hidden
