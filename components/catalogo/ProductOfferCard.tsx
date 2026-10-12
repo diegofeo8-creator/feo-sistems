@@ -26,6 +26,8 @@ function formatPrice(value: string | number | null | undefined): string | null {
   return num.toLocaleString("es-AR");
 }
 
+type Mode = "transfer" | "cuotas";
+
 export default function ProductOfferCard({
   price,
   originalPrice,
@@ -34,7 +36,7 @@ export default function ProductOfferCard({
   facebookUrl,
   discountNote,
 }: Props) {
-  const [openPayments, setOpenPayments] = useState(true);
+  const [mode, setMode] = useState<Mode>("transfer");
 
   const displayPrice = formatPrice(price);
   const displayOriginal = formatPrice(originalPrice);
@@ -49,7 +51,7 @@ export default function ProductOfferCard({
       ? (originalNum - priceNum).toLocaleString("es-AR")
       : null;
 
-  // Precio sin el 10% de descuento (otros medios)
+  // Precio sin el 10% de descuento (otros medios / cuotas)
   const otherPrice =
     priceNum !== null
       ? Math.round(priceNum / 0.9).toLocaleString("es-AR")
@@ -60,10 +62,20 @@ export default function ProductOfferCard({
   const defaultDiscount =
     "Incluye 10% de descuento por pago con depósito o transferencia.";
 
+  // Fondo más claro cuando el bloque está seleccionado
+  const selectedBg = "bg-paper/10";
+  const idleBg = "bg-transparent";
+
   return (
-    <div className="mt-5 rounded-xl overflow-hidden border border-border bg-surface">
-      {/* ===== BLOQUE PRECIO PRINCIPAL ===== */}
-      <div className="px-4 pt-4 pb-3">
+    <div className="mt-5 w-full rounded-xl overflow-hidden border border-border bg-surface">
+      {/* ===== BLOQUE PRECIO PRINCIPAL (transferencia) ===== */}
+      <button
+        type="button"
+        onClick={() => setMode("transfer")}
+        className={`w-full text-left px-4 pt-4 pb-3 transition-colors duration-200 ${
+          mode === "transfer" ? selectedBg : idleBg
+        }`}
+      >
         {/* Mejor precio + tachado + ahorro */}
         {hasDiscount ? (
           <div className="flex flex-wrap items-baseline gap-x-2 gap-y-0.5 mb-1">
@@ -83,11 +95,10 @@ export default function ProductOfferCard({
 
         {/* Precio grande + chevron */}
         <div className="flex items-center gap-1.5">
-          <button
-            type="button"
-            onClick={() => setOpenPayments((v) => !v)}
-            className="text-red-500 shrink-0"
-            aria-label="Ver medios de pago"
+          <span
+            className={`shrink-0 transition-colors ${
+              mode === "transfer" ? "text-accent" : "text-red-500"
+            }`}
           >
             <svg
               width="14"
@@ -97,12 +108,12 @@ export default function ProductOfferCard({
               stroke="currentColor"
               strokeWidth="3"
               className={`transition-transform duration-200 ${
-                openPayments ? "rotate-90" : ""
+                mode === "transfer" ? "rotate-90" : ""
               }`}
             >
               <polyline points="9 6 15 12 9 18" />
             </svg>
-          </button>
+          </span>
           <p className="font-heading font-bold text-[28px] md:text-[32px] leading-none tracking-tight text-accent">
             {displayPrice ? `$ ${displayPrice}` : "Consultar precio"}
           </p>
@@ -112,49 +123,58 @@ export default function ProductOfferCard({
         <p className="text-[12px] text-muted mt-2 leading-snug">
           {discountNote?.trim() || defaultDiscount}
         </p>
-      </div>
+      </button>
 
-      {/* ===== OTROS MEDIOS DE PAGO ===== */}
-      <div className="border-t border-border/60">
-        <button
-          type="button"
-          onClick={() => setOpenPayments((v) => !v)}
-          className="w-full flex items-start gap-2.5 px-4 py-3 text-left hover:bg-paper/5 transition-colors"
-        >
-          <svg
-            width="14"
-            height="14"
-            viewBox="0 0 24 24"
-            fill="none"
-            stroke="currentColor"
-            strokeWidth="3"
-            className={`text-red-500 shrink-0 mt-1 transition-transform duration-200 ${
-              openPayments ? "rotate-90" : ""
+      {/* ===== OTROS MEDIOS DE PAGO / CUOTAS ===== */}
+      <button
+        type="button"
+        onClick={() => setMode("cuotas")}
+        className={`w-full text-left border-t border-border/60 px-4 py-3 transition-colors duration-200 ${
+          mode === "cuotas" ? selectedBg : idleBg
+        }`}
+      >
+        <div className="flex items-start gap-2.5">
+          <span
+            className={`shrink-0 mt-1 transition-colors ${
+              mode === "cuotas" ? "text-accent" : "text-red-500"
             }`}
           >
-            <polyline points="9 6 15 12 9 18" />
-          </svg>
+            <svg
+              width="14"
+              height="14"
+              viewBox="0 0 24 24"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="3"
+              className={`transition-transform duration-200 ${
+                mode === "cuotas" ? "rotate-90" : ""
+              }`}
+            >
+              <polyline points="9 6 15 12 9 18" />
+            </svg>
+          </span>
 
           <div className="flex-1 min-w-0">
-            <p className="text-[13px] text-muted font-medium mb-1">
+            <p className="text-[13px] text-muted font-medium mb-1.5">
               Otros medios de pago
             </p>
 
+            {/* Precio en cuotas — MÁS GRANDE */}
             {otherPrice && (
-              <p className="text-[15px] font-semibold text-paper leading-tight">
+              <p className="font-heading font-bold text-[22px] md:text-[26px] text-paper leading-none tracking-tight">
                 $ {otherPrice}{" "}
-                <span className="text-red-400 font-medium text-[13px]">
+                <span className="text-red-400 font-medium text-[14px] align-middle">
                   Ver cuotas
                 </span>
               </p>
             )}
 
-            <p className="text-[12px] text-muted mt-1 leading-snug">
+            <p className="text-[12px] text-muted mt-2 leading-snug">
               Abonando con billeteras virtuales o tarjeta de crédito.
             </p>
 
             {/* MODO */}
-            <p className="text-[13px] text-paper mt-2 flex flex-wrap items-center gap-1.5">
+            <p className="text-[13px] text-paper mt-2.5 flex flex-wrap items-center gap-1.5">
               <span>Cuotas sin interés abonando desde</span>
               <ModoLogo />
             </p>
@@ -163,41 +183,8 @@ export default function ProductOfferCard({
               Ver promociones
             </p>
           </div>
-        </button>
-
-        {openPayments && (
-          <div className="px-4 pb-3 pt-0 space-y-2 text-[13px] text-paper/85">
-            <div className="flex items-start gap-2">
-              <span className="text-accent mt-0.5">•</span>
-              <span>
-                <strong className="text-paper">Transferencia / Depósito</strong>
-                <span className="text-muted"> — 10% de descuento</span>
-              </span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="text-accent mt-0.5">•</span>
-              <span>
-                <strong className="text-paper">Efectivo</strong>
-                <span className="text-muted"> — al retirar o coordinar</span>
-              </span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="text-accent mt-0.5">•</span>
-              <span>
-                <strong className="text-paper">Tarjeta / Cuotas</strong>
-                <span className="text-muted"> — consultar disponibilidad</span>
-              </span>
-            </div>
-            <div className="flex items-start gap-2">
-              <span className="text-accent mt-0.5">•</span>
-              <span>
-                <strong className="text-paper">MODO / Mercado Pago</strong>
-                <span className="text-muted"> — según el medio</span>
-              </span>
-            </div>
-          </div>
-        )}
-      </div>
+        </div>
+      </button>
 
       {/* ===== GARANTÍA / STOCK / ENVÍO ===== */}
       <div className="border-t border-border/60 px-4 py-3 space-y-2.5">
@@ -277,16 +264,8 @@ function ModoLogo() {
       style={{ color: "#00A650" }}
       aria-label="MODO"
     >
-      <svg
-        width="18"
-        height="18"
-        viewBox="0 0 24 24"
-        fill="none"
-        aria-hidden
-      >
-        {/* Círculo base */}
+      <svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden>
         <circle cx="12" cy="12" r="11" fill="#00A650" />
-        {/* M estilizada */}
         <path
           d="M6.5 16.5V8.5L9.2 13.2L11.9 8.5V16.5"
           stroke="white"
