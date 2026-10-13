@@ -67,11 +67,7 @@ export default function ProductOfferCard({
   const idleBg = "bg-transparent hover:bg-white/[0.03]";
 
   return (
-    /*
-      max-w alinea el borde derecho de la tarjeta con el de la foto
-      (la foto está limitada por aspect-[4/5] max-h-[40rem] ≈ 32rem de ancho máx.)
-    */
-    <div className="mt-5 w-full max-w-[min(100%,28rem)] rounded-xl overflow-hidden border border-border bg-surface box-border">
+    <div className="mt-5 w-full rounded-xl overflow-hidden border border-border bg-surface box-border">
       {/* ===== BLOQUE PRECIO PRINCIPAL (transferencia / 1 pago) ===== */}
       <button
         type="button"

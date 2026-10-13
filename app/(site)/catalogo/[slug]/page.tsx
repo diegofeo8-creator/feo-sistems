@@ -166,19 +166,20 @@ export default async function ArticuloDetailPage({ params }: Props) {
         <span className="text-paper/70 line-clamp-1">{art.title}</span>
       </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,1.15fr)_1fr] gap-8 lg:gap-12">
-        {/* Columna izquierda: Galería + Cartelito */}
+      <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_1fr] gap-8 lg:gap-12">
+        {/* Columna izquierda: Galería + Cartelito (mismo ancho compartido) */}
         <div className="flex flex-col w-full min-w-0">
-          <ProductGallery photos={gallery} title={art.title} />
-
-          <ProductOfferCard
-            price={art.price}
-            originalPrice={art.original_price}
-            title={art.title}
-            mercadolibreUrl={art.mercadolibre_url}
-            facebookUrl={art.facebook_marketplace_url}
-            discountNote={art.discount_note}
-          />
+          <div className="w-full max-w-[34rem]">
+            <ProductGallery photos={gallery} title={art.title} />
+            <ProductOfferCard
+              price={art.price}
+              originalPrice={art.original_price}
+              title={art.title}
+              mercadolibreUrl={art.mercadolibre_url}
+              facebookUrl={art.facebook_marketplace_url}
+              discountNote={art.discount_note}
+            />
+          </div>
         </div>
 
         {/* Info */}

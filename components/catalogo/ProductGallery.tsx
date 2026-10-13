@@ -63,7 +63,7 @@ export default function ProductGallery({ photos, title }: Props) {
 
   return (
     <>
-      <div className="flex gap-3 sm:gap-4 items-start">
+      <div className="flex gap-3 sm:gap-4 items-start w-full">
         {/* Miniaturas verticales — un poco más grandes */}
         {total > 1 && (
           <div className="flex flex-col gap-2.5 shrink-0 w-16 sm:w-20 max-h-[40rem] overflow-y-auto">
