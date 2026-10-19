@@ -126,7 +126,7 @@ export default function ProductGallery({ photos, title }: Props) {
               <img
                 src={current!.url}
                 alt={current!.alt ?? title}
-                className="w-full h-full object-cover object-right"
+                className="w-full h-full object-cover object-center"
               />
             </button>
 
