@@ -180,8 +180,9 @@ export default async function ArticuloDetailPage({ params }: Props) {
           />
         </div>
 
-        {/* Info */}
-        <div className="flex flex-col w-full min-w-0">
+        {/* Info — desplazada a la derecha, ancho de lectura limitado */}
+        <div className="flex flex-col w-full min-w-0 md:pl-16 lg:pl-24">
+          <div className="max-w-2xl">
           {categoria && (
             <Link
               href={`/productos/${categoria.slug}`}
@@ -231,6 +232,7 @@ export default async function ArticuloDetailPage({ params }: Props) {
             Ubicado en Quilmes / Almirante Brown. Consultá disponibilidad y formas de
             entrega.
           </p>
+          </div>
         </div>
       </div>
     </div>
