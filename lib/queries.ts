@@ -403,3 +403,48 @@ export async function getArticulosByCategoryId(categoryId: string) {
 
   return data ?? [];
 }
+
+
+/** Artículos publicados de categorías Software y Unidades de almacenamiento (máx. limit). */
+export async function getHomeArticulos(limit = 8) {
+  const supabase = await createClient();
+
+  const { data: cats, error: catErr } = await supabase
+    .from("productos")
+    .select("id, name, slug");
+
+  if (catErr || !cats?.length) {
+    console.error("getHomeArticulos categorias:", catErr?.message);
+    return [];
+  }
+
+  const allowedIds = cats
+    .filter((c) => {
+      const n = (c.name || "").toLowerCase();
+      const s = (c.slug || "").toLowerCase();
+      return (
+        n.includes("software") ||
+        n.includes("almacenamiento") ||
+        s.includes("software") ||
+        s.includes("almacenamiento")
+      );
+    })
+    .map((c) => c.id);
+
+  if (allowedIds.length === 0) return [];
+
+  const { data, error } = await supabase
+    .from("articulos_categoria")
+    .select("id, title, slug, description, price, cover_image")
+    .in("category_id", allowedIds)
+    .eq("published", true)
+    .order("created_at", { ascending: false })
+    .limit(limit);
+
+  if (error) {
+    console.error("getHomeArticulos articulos:", error.message);
+    return [];
+  }
+
+  return data ?? [];
+}

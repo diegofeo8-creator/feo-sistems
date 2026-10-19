@@ -47,7 +47,9 @@ export default function ArticuloCard({
         )}
         <div className="mt-3 flex items-end justify-between gap-2">
           <span className="font-heading font-bold text-accent text-base">
-            {price && String(price).trim() ? price : "Consultar precio"}
+            {price && String(price).trim()
+              ? (String(price).trim().startsWith("$") ? price : `$ ${price}`)
+              : "Consultar precio"}
           </span>
           <span className="font-heading text-xs text-accent opacity-0 group-hover:opacity-100 transition-opacity shrink-0">
             Ver →
