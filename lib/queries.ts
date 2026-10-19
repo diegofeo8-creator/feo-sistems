@@ -253,7 +253,16 @@ export async function getAllserviciosForAdmin() {
 
   if (error) {
     console.error("Error al leer casos (admin):", error.message);
-    return [];
+    // Fallback sin relación anidada (evita 500 si la FK no está en el schema cache)
+    const plain = await supabase
+      .from("servicios")
+      .select("id, title, slug, published, updated_at, category_id")
+      .order("updated_at", { ascending: false });
+    if (plain.error) {
+      console.error("Error al leer casos (admin plain):", plain.error.message);
+      return [];
+    }
+    return (plain.data ?? []).map((c) => ({ ...c, category: null }));
   }
   return data ?? [];
 }
@@ -402,4 +411,60 @@ export async function getArticulosByCategoryId(categoryId: string) {
   }
 
   return data ?? [];
+}
+
+
+// ── Admin: artículos del catálogo (tabla articulos_categoria) ────────
+export async function getAllArticulosForAdmin() {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("articulos_categoria")
+    .select(
+      "id, title, slug, published, price, updated_at, created_at, category:productos(name, slug)"
+    )
+    .order("created_at", { ascending: false });
+
+  if (error) {
+    console.error("Error al listar artículos (admin):", error.message);
+    // Fallback sin join por si la FK no está expuesta
+    const plain = await supabase
+      .from("articulos_categoria")
+      .select("id, title, slug, published, price, updated_at, created_at, category_id")
+      .order("created_at", { ascending: false });
+    if (plain.error) {
+      console.error("Error al listar artículos (admin plain):", plain.error.message);
+      return [];
+    }
+    return (plain.data ?? []).map((a) => ({ ...a, category: null }));
+  }
+
+  return data ?? [];
+}
+
+export async function getArticuloByIdForAdmin(id: string | number) {
+  const supabase = await createClient();
+
+  const { data, error } = await supabase
+    .from("articulos_categoria")
+    .select(
+      "id, title, slug, description, price, cover_image, published, category_id, category:productos(id, name, slug)"
+    )
+    .eq("id", id)
+    .single();
+
+  if (error || !data) {
+    // Fallback sin join
+    const plain = await supabase
+      .from("articulos_categoria")
+      .select(
+        "id, title, slug, description, price, cover_image, published, category_id"
+      )
+      .eq("id", id)
+      .maybeSingle();
+    if (plain.error || !plain.data) return null;
+    return { ...plain.data, category: null };
+  }
+
+  return data;
 }
