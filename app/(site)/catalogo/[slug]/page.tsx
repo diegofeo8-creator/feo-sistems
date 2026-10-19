@@ -166,9 +166,9 @@ export default async function ArticuloDetailPage({ params }: Props) {
         <span className="text-paper/70 line-clamp-1">{art.title}</span>
       </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,34rem)_1fr] gap-8 lg:gap-10 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,36rem)_1fr] gap-10 lg:gap-16 items-start">
         {/* Columna izquierda: Galería + precio pegados arriba, sin estirar */}
-        <div className="w-full max-w-[34rem] h-fit self-start flex flex-col gap-4">
+        <div className="w-full max-w-[36rem] h-fit self-start flex flex-col gap-4">
           <ProductGallery photos={gallery} title={art.title} />
           <ProductOfferCard
             price={art.price}
@@ -181,8 +181,8 @@ export default async function ArticuloDetailPage({ params }: Props) {
         </div>
 
         {/* Info — desplazada a la derecha, ancho de lectura limitado */}
-        <div className="flex flex-col w-full min-w-0 md:pl-16 lg:pl-24">
-          <div className="max-w-2xl">
+        <div className="flex flex-col w-full min-w-0 md:pl-20 lg:pl-28">
+          <div className="max-w-xl lg:max-w-2xl">
           {categoria && (
             <Link
               href={`/productos/${categoria.slug}`}

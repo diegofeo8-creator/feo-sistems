@@ -53,7 +53,7 @@ export default function ProductGallery({ photos, title }: Props) {
 
   if (total === 0) {
     return (
-      <div className="relative w-full max-w-[520px] aspect-[4/3] h-auto rounded-xl overflow-hidden bg-surface border border-border">
+      <div className="relative w-full max-w-[560px] aspect-[4/3] h-auto rounded-xl overflow-hidden bg-surface border border-border">
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="font-heading text-muted text-sm">Sin imagen</span>
         </div>
@@ -114,19 +114,19 @@ export default function ProductGallery({ photos, title }: Props) {
             </button>
           )}
 
-          {/* Foto principal: proporción nativa, sin estirar altura */}
-          <div className="relative flex-1 min-w-0 w-full max-w-[520px] aspect-[4/3] h-auto rounded-xl overflow-hidden bg-surface border border-border">
+          {/* Foto principal: más ancha, proporción nativa, object-contain */}
+          <div className="relative flex-1 min-w-0 w-full max-w-[560px] aspect-[4/3] h-auto rounded-xl overflow-hidden bg-surface border border-border">
             <button
               type="button"
               onClick={() => setLightbox(true)}
-              className="absolute inset-0 cursor-zoom-in flex items-center justify-center"
+              className="absolute inset-0 cursor-zoom-in flex items-center justify-center bg-surface"
               aria-label="Ver imagen en grande"
             >
               {/* eslint-disable-next-line @next/next/no-img-element */}
               <img
                 src={current!.url}
                 alt={current!.alt ?? title}
-                className="w-full h-full object-contain"
+                className="max-w-full max-h-full w-auto h-auto object-contain"
               />
             </button>
 
