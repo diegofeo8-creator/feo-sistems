@@ -53,7 +53,7 @@ export default function ProductGallery({ photos, title }: Props) {
 
   if (total === 0) {
     return (
-      <div className="relative w-full aspect-[4/3] h-auto rounded-xl overflow-hidden bg-surface border border-border">
+      <div className="relative w-full aspect-[4/5] h-auto rounded-xl overflow-hidden bg-surface border border-border">
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="font-heading text-muted text-sm">Sin imagen</span>
         </div>
@@ -115,7 +115,7 @@ export default function ProductGallery({ photos, title }: Props) {
           )}
 
           {/* Foto principal: más ancha, proporción nativa, object-contain */}
-          <div className="relative flex-1 min-w-0 w-full aspect-[4/3] h-auto rounded-xl overflow-hidden bg-surface border border-border">
+          <div className="relative flex-1 min-w-0 w-full aspect-[4/5] h-auto rounded-xl overflow-hidden bg-surface border border-border">
             <button
               type="button"
               onClick={() => setLightbox(true)}
@@ -126,7 +126,7 @@ export default function ProductGallery({ photos, title }: Props) {
               <img
                 src={current!.url}
                 alt={current!.alt ?? title}
-                className="w-full h-full object-contain"
+                className="w-full h-full object-cover"
               />
             </button>
 
