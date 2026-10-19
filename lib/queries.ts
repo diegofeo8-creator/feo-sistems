@@ -415,23 +415,24 @@ export async function getArticulosByCategoryId(categoryId: string) {
 
 
 // ── Admin: artículos del catálogo (tabla articulos_categoria) ────────
+// Misma forma de select que el catálogo público (productos(...)),
+// sin pedir columnas que pueden no existir (updated_at/created_at).
 export async function getAllArticulosForAdmin() {
   const supabase = await createClient();
 
   const { data, error } = await supabase
     .from("articulos_categoria")
     .select(
-      "id, title, slug, published, price, updated_at, created_at, category:productos(name, slug)"
+      "id, title, slug, published, price, category_id, productos ( name, slug )"
     )
-    .order("created_at", { ascending: false });
+    .order("title", { ascending: true });
 
   if (error) {
     console.error("Error al listar artículos (admin):", error.message);
-    // Fallback sin join por si la FK no está expuesta
+    // Fallback mínimo: solo columnas base, sin relación
     const plain = await supabase
       .from("articulos_categoria")
-      .select("id, title, slug, published, price, updated_at, created_at, category_id")
-      .order("created_at", { ascending: false });
+      .select("id, title, slug, published, price, category_id");
     if (plain.error) {
       console.error("Error al listar artículos (admin plain):", plain.error.message);
       return [];
@@ -439,7 +440,12 @@ export async function getAllArticulosForAdmin() {
     return (plain.data ?? []).map((a) => ({ ...a, category: null }));
   }
 
-  return data ?? [];
+  // La UI del admin espera a.category?.name
+  return (data ?? []).map((a) => {
+    // @ts-expect-error — relación anidada en runtime
+    const cat = a.productos ?? null;
+    return { ...a, category: cat };
+  });
 }
 
 export async function getArticuloByIdForAdmin(id: string | number) {
@@ -448,13 +454,13 @@ export async function getArticuloByIdForAdmin(id: string | number) {
   const { data, error } = await supabase
     .from("articulos_categoria")
     .select(
-      "id, title, slug, description, price, cover_image, published, category_id, category:productos(id, name, slug)"
+      "id, title, slug, description, price, cover_image, published, category_id, productos ( id, name, slug )"
     )
     .eq("id", id)
-    .single();
+    .maybeSingle();
 
   if (error || !data) {
-    // Fallback sin join
+    console.error("Error getArticuloByIdForAdmin:", error?.message);
     const plain = await supabase
       .from("articulos_categoria")
       .select(
@@ -466,5 +472,6 @@ export async function getArticuloByIdForAdmin(id: string | number) {
     return { ...plain.data, category: null };
   }
 
-  return data;
+  // @ts-expect-error — relación anidada en runtime
+  return { ...data, category: data.productos ?? null };
 }
