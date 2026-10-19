@@ -53,7 +53,7 @@ export default function ProductGallery({ photos, title }: Props) {
 
   if (total === 0) {
     return (
-      <div className="relative w-full aspect-[4/5] max-h-[40rem] rounded-xl overflow-hidden bg-surface border border-border">
+      <div className="relative w-full aspect-[4/3] max-h-[28rem] rounded-xl overflow-hidden bg-surface border border-border">
         <div className="absolute inset-0 flex items-center justify-center">
           <span className="font-heading text-muted text-sm">Sin imagen</span>
         </div>
@@ -66,7 +66,7 @@ export default function ProductGallery({ photos, title }: Props) {
       <div className="flex gap-3 sm:gap-4 items-start w-full">
         {/* Miniaturas verticales — un poco más grandes */}
         {total > 1 && (
-          <div className="flex flex-col gap-2.5 shrink-0 w-16 sm:w-20 max-h-[40rem] overflow-y-auto">
+          <div className="flex flex-col gap-2.5 shrink-0 w-14 sm:w-16 max-h-[28rem] overflow-y-auto">
             {photos.map((photo, i) => (
               <button
                 key={photo.id}
@@ -115,7 +115,7 @@ export default function ProductGallery({ photos, title }: Props) {
           )}
 
           {/* Foto principal más grande */}
-          <div className="relative flex-1 min-w-0 aspect-[4/5] max-h-[40rem] rounded-xl overflow-hidden bg-surface border border-border">
+          <div className="relative flex-1 min-w-0 aspect-[4/3] max-h-[28rem] rounded-xl overflow-hidden bg-surface border border-border">
             <button
               type="button"
               onClick={() => setLightbox(true)}

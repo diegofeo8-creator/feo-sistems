@@ -67,7 +67,7 @@ export default function ProductOfferCard({
   const idleBg = "bg-transparent hover:bg-white/[0.03]";
 
   return (
-    <div className="mt-5 w-full rounded-xl overflow-hidden border border-border bg-surface box-border">
+    <div className="w-full rounded-xl overflow-hidden border border-border bg-surface box-border">
       {/* ===== BLOQUE PRECIO PRINCIPAL (transferencia / 1 pago) ===== */}
       <button
         type="button"
