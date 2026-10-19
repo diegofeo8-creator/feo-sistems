@@ -166,9 +166,9 @@ export default async function ArticuloDetailPage({ params }: Props) {
         <span className="text-paper/70 line-clamp-1">{art.title}</span>
       </nav>
 
-      <div className="grid grid-cols-1 lg:grid-cols-[minmax(0,36rem)_1fr] gap-10 lg:gap-16 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-[1.35fr_1fr] gap-10 lg:gap-16 items-start">
         {/* Columna izquierda: Galería + precio pegados arriba, sin estirar */}
-        <div className="w-full max-w-[36rem] h-fit self-start flex flex-col gap-4">
+        <div className="w-full h-fit self-start flex flex-col gap-4">
           <ProductGallery photos={gallery} title={art.title} />
           <ProductOfferCard
             price={art.price}
