@@ -16,7 +16,7 @@ type Photo = {
 };
 
 interface Props {
-  articleId: number;
+  articleId: number | string;
   coverImage: string | null;
   photos: Photo[];
 }

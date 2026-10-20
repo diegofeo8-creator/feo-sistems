@@ -178,3 +178,131 @@ export async function togglePublishArticulo(
   revalidatePath("/productos");
   revalidatePath("/catalogo");
 }
+
+
+// ── Galería de fotos del artículo (articulos_media + storage) ────────
+
+export async function registerMedia(input: {
+  articleId: number | string;
+  url: string;
+  alt?: string;
+  order?: number;
+}): Promise<{ id?: number; error?: string }> {
+  const { supabase } = await requireUser();
+
+  const { data, error } = await supabase
+    .from("articulos_media")
+    .insert({
+      articulo_id: input.articleId,
+      url: input.url,
+      alt: input.alt ?? null,
+      order: input.order ?? 0,
+    })
+    .select("id")
+    .single();
+
+  if (error) {
+    console.error("registerMedia:", error.message);
+    return { error: error.message };
+  }
+
+  revalidatePath(`/admin/articulos/${input.articleId}/editar`);
+  revalidatePath("/catalogo");
+  return { id: data.id as number };
+}
+
+export async function deleteMedia(
+  mediaId: number | string,
+  articleId: number | string
+): Promise<{ error?: string }> {
+  const { supabase } = await requireUser();
+
+  // Traer URL antes de borrar (para storage y cover)
+  const { data: row } = await supabase
+    .from("articulos_media")
+    .select("id, url")
+    .eq("id", mediaId)
+    .maybeSingle();
+
+  const { error } = await supabase
+    .from("articulos_media")
+    .delete()
+    .eq("id", mediaId);
+
+  if (error) {
+    console.error("deleteMedia:", error.message);
+    return { error: error.message };
+  }
+
+  // Si era la portada, poner la siguiente foto o null
+  if (row?.url) {
+    const { data: art } = await supabase
+      .from("articulos_categoria")
+      .select("cover_image, slug")
+      .eq("id", articleId)
+      .maybeSingle();
+
+    if (art?.cover_image === row.url) {
+      const { data: next } = await supabase
+        .from("articulos_media")
+        .select("url")
+        .eq("articulo_id", articleId)
+        .order("order", { ascending: true })
+        .limit(1)
+        .maybeSingle();
+
+      await supabase
+        .from("articulos_categoria")
+        .update({ cover_image: next?.url ?? null })
+        .eq("id", articleId);
+    }
+
+    // Intentar borrar del bucket (path después de /case-media/)
+    try {
+      const marker = "/case-media/";
+      const idx = row.url.indexOf(marker);
+      if (idx !== -1) {
+        const path = row.url.slice(idx + marker.length);
+        await supabase.storage.from("case-media").remove([path]);
+      }
+    } catch {
+      // no bloquear si falla el storage
+    }
+  }
+
+  revalidatePath(`/admin/articulos/${articleId}/editar`);
+  revalidatePath("/catalogo");
+  revalidatePath("/productos");
+  return {};
+}
+
+export async function setCoverFromMedia(
+  mediaId: number | string,
+  articleId: number | string
+): Promise<{ error?: string }> {
+  const { supabase } = await requireUser();
+
+  const { data: row, error: fetchErr } = await supabase
+    .from("articulos_media")
+    .select("url")
+    .eq("id", mediaId)
+    .maybeSingle();
+
+  if (fetchErr || !row?.url) {
+    return { error: fetchErr?.message ?? "Foto no encontrada." };
+  }
+
+  const { error } = await supabase
+    .from("articulos_categoria")
+    .update({ cover_image: row.url })
+    .eq("id", articleId);
+
+  if (error) {
+    return { error: error.message };
+  }
+
+  revalidatePath(`/admin/articulos/${articleId}/editar`);
+  revalidatePath("/catalogo");
+  revalidatePath("/productos");
+  return {};
+}
