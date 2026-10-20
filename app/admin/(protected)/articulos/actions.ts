@@ -135,7 +135,6 @@ export async function updateArticulo(articuloId: string, formData: FormData) {
       category_id: fields.category_id,
       published: fields.published,
       slug,
-      updated_at: new Date().toISOString(),
     })
     .eq("id", articuloId);
 
