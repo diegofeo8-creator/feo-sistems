@@ -454,7 +454,7 @@ export async function getArticuloByIdForAdmin(id: string | number) {
   const { data, error } = await supabase
     .from("articulos_categoria")
     .select(
-      "id, title, slug, description, price, cover_image, published, category_id, productos ( id, name, slug )"
+      "id, title, slug, description, price, original_price, cover_image, published, category_id, productos ( id, name, slug )"
     )
     .eq("id", id)
     .maybeSingle();
@@ -464,7 +464,7 @@ export async function getArticuloByIdForAdmin(id: string | number) {
     const plain = await supabase
       .from("articulos_categoria")
       .select(
-        "id, title, slug, description, price, cover_image, published, category_id"
+        "id, title, slug, description, price, original_price, cover_image, published, category_id"
       )
       .eq("id", id)
       .maybeSingle();

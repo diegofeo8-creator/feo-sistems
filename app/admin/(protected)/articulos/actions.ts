@@ -55,6 +55,7 @@ function readFields(formData: FormData) {
     title: ((formData.get("title") as string) ?? "").trim(),
     description: ((formData.get("description") as string) ?? "").trim(),
     price: ((formData.get("price") as string) ?? "").trim(),
+    original_price: ((formData.get("original_price") as string) ?? "").trim() || null,
     cover_image: ((formData.get("cover_image") as string) ?? "").trim() || null,
     category_id: ((formData.get("category_id") as string) ?? "").trim(),
     published: formData.get("published") === "on" || formData.get("published") === "true",
@@ -82,6 +83,7 @@ export async function createArticulo(formData: FormData) {
       title: fields.title,
       description: fields.description || null,
       price: fields.price || null,
+      original_price: fields.original_price,
       cover_image: fields.cover_image,
       category_id: fields.category_id,
       published: fields.published,
@@ -125,18 +127,38 @@ export async function updateArticulo(articuloId: string, formData: FormData) {
 
   const slug = await uniqueSlug(supabase, fields.title, articuloId);
 
-  const { error } = await supabase
+  const payload: Record<string, unknown> = {
+    title: fields.title,
+    description: fields.description || null,
+    price: fields.price || null,
+    original_price: fields.original_price,
+    cover_image: fields.cover_image,
+    category_id: fields.category_id,
+    published: fields.published,
+    slug,
+  };
+
+  let { error } = await supabase
     .from("articulos_categoria")
-    .update({
-      title: fields.title,
-      description: fields.description || null,
-      price: fields.price || null,
-      cover_image: fields.cover_image,
-      category_id: fields.category_id,
-      published: fields.published,
-      slug,
-    })
+    .update(payload)
     .eq("id", articuloId);
+
+  // Si la columna original_price no existe aún, reintentar sin ella
+  if (error && /original_price/i.test(error.message)) {
+    delete payload.original_price;
+    ({ error } = await supabase
+      .from("articulos_categoria")
+      .update(payload)
+      .eq("id", articuloId));
+    if (!error) {
+      redirect(
+        `/admin/articulos/${articuloId}/editar?error=` +
+          encodeURIComponent(
+            "Se guardó el resto, pero falta la columna original_price en Supabase. Creala (text) para poder editar el precio de cuotas."
+          )
+      );
+    }
+  }
 
   if (error) {
     redirect(

@@ -13,6 +13,7 @@ interface ArticuloFormProps {
     title?: string;
     description?: string | null;
     price?: string | null;
+    original_price?: string | null;
     cover_image?: string | null;
     category_id?: string | null;
     published?: boolean;
@@ -71,6 +72,25 @@ export default function ArticuloForm({
           defaultValue={defaults.price ?? ""}
           className="w-full bg-surface border border-border rounded-sm px-3 py-2 text-paper text-sm focus:outline-none focus:border-accent"
         />
+        <p className="text-muted text-xs mt-1">
+          Precio con transferencia / depósito (el de “Mejor precio”).
+        </p>
+      </div>
+
+      <div>
+        <label htmlFor="original_price" className="block font-heading text-sm text-paper mb-1.5">
+          Precio otros medios / cuotas
+        </label>
+        <input
+          id="original_price"
+          name="original_price"
+          placeholder="Ej: 944.444 (opcional)"
+          defaultValue={defaults.original_price ?? ""}
+          className="w-full bg-surface border border-border rounded-sm px-3 py-2 text-paper text-sm focus:outline-none focus:border-accent"
+        />
+        <p className="text-muted text-xs mt-1">
+          El de abajo en la ficha (“Ver cuotas”). Si lo dejás vacío, se calcula solo como precio ÷ 0,9.
+        </p>
       </div>
 
       <div>

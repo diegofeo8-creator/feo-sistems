@@ -51,11 +51,13 @@ export default function ProductOfferCard({
       ? (originalNum - priceNum).toLocaleString("es-AR")
       : null;
 
-  // Precio sin el 10% de descuento (otros medios / cuotas)
+  // Precio otros medios / cuotas: editable (original_price) o auto (precio/0.9)
   const otherPrice =
-    priceNum !== null
-      ? Math.round(priceNum / 0.9).toLocaleString("es-AR")
-      : null;
+    originalNum !== null
+      ? originalNum.toLocaleString("es-AR")
+      : priceNum !== null
+        ? Math.round(priceNum / 0.9).toLocaleString("es-AR")
+        : null;
 
   const hasSocial = Boolean(mercadolibreUrl || facebookUrl);
 

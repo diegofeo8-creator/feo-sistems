@@ -69,6 +69,8 @@ export default async function EditarArticuloPage({ params, searchParams }: Props
             title: articulo.title,
             description: articulo.description,
             price: articulo.price,
+            // @ts-expect-error columna opcional
+            original_price: articulo.original_price ?? null,
             cover_image: articulo.cover_image,
             category_id: articulo.category_id,
             published: articulo.published,
